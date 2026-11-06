@@ -70,7 +70,7 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 .sheet::before{content:"";position:absolute;left:0;right:0;top:-1px;height:10px;background:radial-gradient(circle at 10px 0,var(--enamel) 6px,transparent 6.5px) 0 0/20px 10px repeat-x}
 .tick-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 12px}
 .tag{font:800 15px/1 var(--cond);letter-spacing:.14em;text-transform:uppercase;border:2.5px solid var(--ink);border-radius:4px;padding:5px 8px}
-.linky{border:0;background:none;padding:8px;color:var(--soft);font-size:15px;text-decoration:underline}
+.linky{border:0;background:none;padding:8px;color:var(--soft);font-size:15px;text-decoration:underline;white-space:nowrap}
 .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;border-bottom:2px dashed var(--paperline)}
 .topic{margin:0 0 12px;color:var(--soft);font:14px/1.35 var(--type)}
 .topic b{font-weight:700}
@@ -92,6 +92,11 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 .btn.go{background:var(--tomato);color:#fff4e0;font-size:21px}
 .btn:disabled{opacity:.45}
 .scale{display:flex;justify-content:space-between;font-size:13px;color:var(--soft);margin:6px 2px 0}
+.marks{display:flex;gap:8px;margin-top:10px}
+.pill{flex:1;min-height:42px;border:2px dashed var(--soft);border-radius:21px;background:none;color:var(--soft);font:600 15px/1 var(--body)}
+.pill.on{border-style:solid;border-color:var(--ink);background:var(--brass);color:#1f1b16}
+.morebtn{display:block;margin:2px 0 0 -8px}
+.morebody .why{margin-bottom:10px}
 textarea,input[type=text]{width:100%;font:17px/1.3 var(--body);color:var(--ink);background:var(--enamel);border:2.5px solid var(--ink);border-radius:8px;padding:10px;margin-top:8px}
 textarea{height:70px;resize:none}
 #stamp{position:absolute;left:50%;top:38%;padding:8px 18px;border:6px solid var(--stamp);border-radius:8px;color:var(--stamp);font:800 46px/1 var(--cond);letter-spacing:.12em;
@@ -139,7 +144,7 @@ textarea{height:70px;resize:none}
 <section id="player" hidden><div id="playbar"><span id="playtitle"></span><button id="done" type="button">DONE</button></div></section>
 <script>
 'use strict';
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 const RESEND_MS = 6 * 3600e3;      // the channel keeps a message 12 h; a result the PC hasn't confirmed goes again
 const MAX_SENDS = 40;              // per sync; the channel allows 250 a day
 const SEND_TIMEOUT = 20000;
@@ -375,13 +380,13 @@ async function refresh() {
 }
 setInterval(refresh, 30000);
 
-const el = (tag, props, ...kids) => { const e = document.createElement(tag); Object.assign(e, props || {}); kids.flat().forEach(k => e.append(k)); return e; };
+const el = (tag, props, ...kids) => { const e = document.createElement(tag); Object.assign(e, props || {}); kids.flat(Infinity).forEach(k => e.append(k)); return e; };
 const para = (cls, text) => el('p', { className: cls, textContent: text });
 const btn = (text, onclick, cls) => el('button', { type: 'button', className: 'btn ' + (cls || ''), textContent: text, onclick });
 
 function showSheet(...kids) {
   const sh = $('#sheet');
-  sh.replaceChildren(...kids.flat());
+  sh.replaceChildren(...kids.flat(Infinity));
   sh.hidden = false; sh.classList.remove('away');
   void sh.offsetWidth;
   sh.classList.remove('off');
@@ -447,12 +452,33 @@ function head(tag, it) {
 }
 function rowOf(buttons) { return el('div', { className: 'row' }, buttons); }
 
+/* every rating card: short by default, and a confusing mark beside a number or instead of one. Both reach the result. */
+function newCard(expandable) { S.card = { expandable, expanded: false, confused: false }; }
+function more(kids, onToggle) {
+  const body = el('div', { className: 'morebody', hidden: true }, kids);
+  const b = el('button', { type: 'button', className: 'linky morebtn', textContent: 'more', onclick: () => {
+    body.hidden = !body.hidden;
+    b.textContent = body.hidden ? 'more' : 'less';
+    if (!body.hidden) S.card.expanded = true;
+    if (onToggle) onToggle(!body.hidden);
+  } });
+  return [b, body];
+}
+function marks(it, noNumber, extra) {
+  const flag = el('button', { type: 'button', className: 'pill', textContent: '+ confusing', onclick: () => { S.card.confused = !S.card.confused; flag.classList.toggle('on', S.card.confused); } });
+  const idk = el('button', { type: 'button', className: 'pill', textContent: 'idk, confusing', onclick: () => { S.card.confused = true; file(it, noNumber(), extra); } });
+  return el('div', { className: 'marks' }, flag, idk);
+}
+
 /* every result goes through here: stored and marked done in one transaction before the screen says FILED */
 let filing = false;
 async function file(it, data, extra) {
   if (filing) return;       // a double tap files once
   filing = true;
   try {
+    const card = S.card || {};
+    if (card.confused) data = { ...data, confused: true };
+    if (card.expandable) data = { ...data, expanded: !!card.expanded };
     const row = { id: newId(), v: 1, player: S.player, kind: it.kind, item: it.id, ts: new Date().toISOString(), app: APP_VERSION, backlog: S.backlog && S.backlog.build, data };
     await tx(['results', 'done', 'kv'], 'readwrite', t => {
       t.objectStore('results').put({ id: row.id, row, sent_at: null, sends: 0 });
@@ -466,47 +492,60 @@ async function file(it, data, extra) {
 }
 
 function ticketIdea(it) {
+  newCard(true);
   const pick = { r: null };
   const nums = [1, 2, 3, 4, 5].map(n => btn(String(n), () => choose(n), 'num'));
   const controls = el('div', { className: 'controls' }, el('p', { className: 'ask', textContent: 'How good?' }), rowOf(nums),
-    el('div', { className: 'scale' }, el('span', { textContent: 'nah' }), el('span', { textContent: 'love it' })));
+    el('div', { className: 'scale' }, el('span', { textContent: 'nah' }), el('span', { textContent: 'love it' })),
+    marks(it, () => ({ r: null, ok: null, category: it.category || 'unknown' })));
   function choose(n) {
     pick.r = n;
     nums.forEach((b, i) => b.classList.toggle('on', i === n - 1));
     if (!controls.querySelector('.approve')) {
       const send = ok => file(it, { r: pick.r, ok, category: it.category || 'unknown' });
       controls.append(el('div', { className: 'approve' }, el('p', { className: 'ask', style: 'margin-top:12px', textContent: 'Approve it?' }),
-        rowOf([btn('Approve', () => send(true)), btn('Deny', () => send(false)), btn('Just the number', () => send(null))])));
+        rowOf([btn('Approve', () => send(true)), btn('Deny', () => send(false)), btn('Neither', () => send(null))])));
     }
   }
-  showSheet(head({ business: 'Rate this business idea', tech: 'Rate this tech idea' }[it.category] || 'Rate this idea', it),
-    el('div', { className: 'scroll' }, it.topic ? el('p', { className: 'topic' }, el('b', { textContent: 'Topic: ' }), it.topic) : '', para('big-text', it.idea), it.why ? para('why', 'Why: ' + it.why) : ''),
+  showSheet(head({ business: 'Business idea', tech: 'Tech idea' }[it.category] || 'Idea', it),
+    el('div', { className: 'scroll' }, para('big-text', it.idea),
+      it.why || it.topic ? more([it.why ? para('why', 'Why: ' + it.why) : '', it.topic ? el('p', { className: 'topic' }, el('b', { textContent: 'Topic: ' }), it.topic) : '']) : ''),
     controls);
   $('#sheet').dataset.kind = 'idea';
 }
 function ticketTech(it) {
-  showSheet(head('Score this tech', it),
-    el('div', { className: 'scroll' }, para('big-text', it.title), para('why', it.about)),
+  const short = it.short && it.short !== it.about ? it.short : null;
+  newCard(true);
+  const line = para('why', short || it.about);
+  showSheet(head('Our tech', it),
+    el('div', { className: 'scroll' }, para('big-text', it.title), line, short ? more([], open => { line.textContent = open ? it.about : short; }) : ''),
     el('div', { className: 'controls' }, el('p', { className: 'ask', textContent: 'How good is it?' }),
       rowOf([1, 2, 3, 4, 5].map(n => btn(String(n), () => file(it, { r: n, tech: it.tech }), 'num'))),
-      el('div', { className: 'scale' }, el('span', { textContent: 'nah' }), el('span', { textContent: 'love it' }))));
+      el('div', { className: 'scale' }, el('span', { textContent: 'nah' }), el('span', { textContent: 'love it' })),
+      marks(it, () => ({ r: null, tech: it.tech }))));
   $('#sheet').dataset.kind = 'tech-score';
 }
 function ticketMiss(it) {
+  newCard(true);
+  const said = it.said_short || it.said, before = it.before_short || it.before;
+  const quote = para('quote', said), ctx = para('ctx', before);
   showSheet(head('Real miss?', it),
     el('div', { className: 'scroll' },
-      el('p', { className: 'label', textContent: it.interrupted ? 'You stopped the agent and said' : 'You said' }), para('quote', it.said),
-      el('p', { className: 'label', textContent: 'Before that, you said' }), para('ctx', it.before),
-      it.agent ? [el('p', { className: 'label', textContent: "The agent's last words" }), para('ctx', it.agent)] : []),
+      el('p', { className: 'label', textContent: it.interrupted ? 'You stopped the agent and said' : 'You said' }), quote,
+      el('p', { className: 'label', textContent: 'Before that' }), ctx,
+      more([it.agent ? [el('p', { className: 'label', textContent: "The agent's last words" }), para('ctx', it.agent)] : [],
+        el('p', { className: 'label', textContent: 'What counts as a miss' }), para('ctx', "Misunderstood it, ignored it, didn't do it, or you had to repeat it. Asking for changes to good work isn't a miss.")],
+      open => { quote.textContent = open ? it.said : said; ctx.textContent = open ? it.before : before; })),
     el('div', { className: 'controls' },
-      el('p', { className: 'ask' }, 'Did the agent miss what you asked?', el('small', { textContent: "Misunderstood it, ignored it, didn't do it, or you had to repeat it. Asking for changes to good work isn't a miss." })),
-      rowOf([btn('Yes', () => file(it, { answer: 'yes' })), btn('No', () => file(it, { answer: 'no' })), btn('Unsure', () => file(it, { answer: 'unsure' }))])));
+      el('p', { className: 'ask', textContent: 'Did the agent miss it?' }),
+      rowOf([btn('Yes', () => file(it, { answer: 'yes' })), btn('No', () => file(it, { answer: 'no' })), btn('Unsure', () => file(it, { answer: 'unsure' }))]),
+      marks(it, () => ({ answer: null }))));
   $('#sheet').dataset.kind = 'miss';
 }
 function ticketGame(it) {
   showSheet(head('Play this', it),
-    el('div', { className: 'scroll' }, para('big-text', it.title), para('why', it.blurb), it.round > 1 ? para('why', 'A second go. Replays count too.') : '',
-      para('why', 'As long as you like. Tap DONE when you’re done, then tell us how it was. Works with no service.')),
+    el('div', { className: 'scroll' }, para('big-text', it.title), para('why', it.blurb), it.round > 1 ? para('why', 'A second go.') : '',
+      para('why', 'Tap DONE when you’re done.')),
     el('div', { className: 'controls' }, rowOf(btn('Play', () => startGame(it), 'go'))));
   $('#sheet').dataset.kind = 'game';
 }
@@ -542,6 +581,7 @@ function endGame() {
 }
 function fmtTime(ms) { const s = Math.round(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 function ticketAfterPlay(it, ms) {
+  newCard(false);
   const pick = { fun: null, replay: null };
   const go = btn('File it', () => file(it, { game: it.game, upload: it.upload, round: it.round, fun: pick.fun, replay: pick.replay, note: note.value.trim(), play_ms: Math.round(ms), broken: false }, 'endplay'), 'go');
   go.disabled = true;
@@ -555,7 +595,8 @@ function ticketAfterPlay(it, ms) {
     el('div', { className: 'scroll' },
       el('p', { className: 'ask', textContent: `You played ${fmtTime(ms)}. How fun?` }), rowOf(nums),
       el('div', { className: 'scale' }, el('span', { textContent: 'dull' }), el('span', { textContent: 'great' })),
-      el('p', { className: 'ask', style: 'margin-top:14px', textContent: 'Would you play it again?' }), rowOf([yes, no]), note),
+      marks(it, () => ({ game: it.game, upload: it.upload, round: it.round, fun: null, replay: null, note: note.value.trim(), play_ms: Math.round(ms), broken: false }), 'endplay'),
+      el('p', { className: 'ask', style: 'margin-top:14px', textContent: 'Play it again?' }), rowOf([yes, no]), note),
     el('div', { className: 'controls' }, rowOf(go),
       el('button', { type: 'button', className: 'linky', style: 'width:100%', textContent: "It didn't work", onclick: () => file(it, { game: it.game, upload: it.upload, round: it.round, fun: null, replay: null, note: note.value.trim(), play_ms: Math.round(ms), broken: true }, 'endplay') })));
   $('#sheet').dataset.kind = 'afterplay';
