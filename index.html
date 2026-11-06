@@ -391,9 +391,10 @@ function hideSheet(how) {
   const sh = $('#sheet');
   sh.classList.add(how === 'away' ? 'away' : 'off');
   S.ticket = false;
-  setTimeout(() => { if (!S.ticket) { sh.hidden = true; sh.classList.remove('away'); sh.classList.add('off'); sh.replaceChildren(); } }, 340);
+  setTimeout(() => { if (!S.ticket) { sh.hidden = true; sh.classList.remove('away'); sh.classList.add('off'); sh.replaceChildren(); reloadIfIdle(); } }, 340);
   refresh();
 }
+function reloadIfIdle() { if (S.newShell && !S.ticket && !S.play) location.reload(); }   // a new version waits for a free moment, never interrupts a ticket or a game
 async function stampAndGo() {
   const st = $('#stamp');
   st.classList.remove('hit'); void st.offsetWidth; st.classList.add('hit');
@@ -623,8 +624,12 @@ async function boot() {
   document.addEventListener('visibilitychange', () => { playTick(); if (!document.hidden) sync(); });
   window.addEventListener('pagehide', playTick);
   if ('serviceWorker' in navigator) {
-    const had = !!navigator.serviceWorker.controller;
-    navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && !S.ticket && !S.play) location.reload(); else refresh(); });
+    let had = !!navigator.serviceWorker.controller;      // the first claim on a fresh install is not an update
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (had) { S.newShell = true; reloadIfIdle(); }
+      had = true;
+      refresh();
+    });
   }
   refresh();
   const session = await kvGet('session');
