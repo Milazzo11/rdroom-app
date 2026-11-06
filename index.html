@@ -60,7 +60,7 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 .g b.small{font-size:15px;line-height:1.75}
 .g span{display:block;margin-top:3px;font:600 10.5px/1.15 var(--cond);letter-spacing:.09em;text-transform:uppercase;color:#d8cdb6}
 #status{width:100%;max-width:440px;margin:8px 0 0;font-size:14px;line-height:1.3;color:var(--soft);text-align:center;min-height:2.6em}
-#more{border:0;background:none;color:var(--soft);font-size:13px;text-decoration:underline;padding:6px 10px}
+.more-link{border:0;background:none;color:var(--soft);font-size:13px;text-decoration:underline;padding:6px 10px}
 
 /* the ticket */
 .sheet{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--paper);color:var(--ink);z-index:5;
@@ -71,7 +71,7 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 .tick-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 12px}
 .tag{font:800 15px/1 var(--cond);letter-spacing:.14em;text-transform:uppercase;border:2.5px solid var(--ink);border-radius:4px;padding:5px 8px}
 .linky{border:0;background:none;padding:8px;color:var(--soft);font-size:15px;text-decoration:underline;white-space:nowrap}
-.scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;border-bottom:2px dashed var(--paperline)}
+.scroll{flex:1;min-height:72px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;border-bottom:2px dashed var(--paperline)}
 .topic{margin:0 0 12px;color:var(--soft);font:14px/1.35 var(--type)}
 .topic b{font-weight:700}
 .big-text{margin:0 0 12px;font-size:22px;line-height:1.32;font-weight:600}
@@ -80,7 +80,7 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 .label{margin:14px 0 4px;font:700 12px/1 var(--cond);letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
 .quote{margin:0;font-size:21px;line-height:1.32;font-weight:600}
 .ctx{margin:0;font:15px/1.4 var(--type);color:var(--ink);opacity:.85}
-.controls{padding-top:12px}
+.controls{padding:12px 0 5px;overflow-y:auto;-webkit-overflow-scrolling:touch}   /* with everything open on a small phone the answers stay reachable */
 .ask{margin:0 0 8px;font-weight:700}
 .ask small{display:block;font-weight:400;color:var(--soft);font-size:14px;line-height:1.3;margin-top:2px}
 .row{display:flex;gap:8px}
@@ -92,8 +92,19 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 .btn.go{background:var(--tomato);color:#fff4e0;font-size:21px}
 .btn:disabled{opacity:.45}
 .scale{display:flex;justify-content:space-between;font-size:13px;color:var(--soft);margin:6px 2px 0}
-.marks{display:flex;gap:8px;margin-top:10px}
-.pill{flex:1;min-height:42px;border:2px dashed var(--soft);border-radius:21px;background:none;color:var(--soft);font:600 15px/1 var(--body)}
+.marks{display:flex;gap:6px;margin-top:10px}
+.pill{flex:1;min-height:42px;padding:0 4px;border:2px dashed var(--soft);border-radius:21px;background:none;color:var(--soft);font:600 14px/1 var(--body)}
+.notebox{height:64px;margin:10px 0 0}
+.askrow{display:flex;align-items:center;justify-content:space-between}
+.askrow .ask{margin:0}
+.axisrow{margin-top:8px}
+.axislabel{display:block;font-size:13px;font-weight:600;color:var(--soft);margin-bottom:3px}
+.btn.small{min-height:38px;font-size:18px;box-shadow:0 2px 0 var(--ink)}
+.links{display:flex;gap:6px}
+.sorts{display:flex;gap:6px;margin:0 0 8px}
+.stashrow{padding:10px 0;border-bottom:2px dashed var(--paperline)}
+.stashrow .score{font:700 13px/1.2 ui-monospace,Menlo,monospace;color:var(--soft);margin:0 0 4px}
+.stashrow .text{margin:0 0 8px;font-size:16px;line-height:1.3}
 .pill.on{border-style:solid;border-color:var(--ink);background:var(--brass);color:#1f1b16}
 .morebtn{display:block;margin:2px 0 0 -8px}
 .morebody .why{margin-bottom:10px}
@@ -137,14 +148,14 @@ textarea{height:70px;resize:none}
     <div class="g"><b id="gLast" class="small">never</b><span>Last synced</span></div>
   </section>
   <p id="status" role="status"></p>
-  <button id="more" type="button">details</button>
+  <div class="links"><button id="stash" class="more-link" type="button">stash</button><button id="more" class="more-link" type="button">details</button></div>
 </main>
 <section id="sheet" class="sheet off" hidden></section>
 <div id="stamp" aria-hidden="true">FILED</div>
 <section id="player" hidden><div id="playbar"><span id="playtitle"></span><button id="done" type="button">DONE</button></div></section>
 <script>
 'use strict';
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.3.0';
 const RESEND_MS = 6 * 3600e3;      // the channel keeps a message 12 h; a result the PC hasn't confirmed goes again
 const MAX_SENDS = 40;              // per sync; the channel allows 250 a day
 const SEND_TIMEOUT = 20000;
@@ -453,7 +464,7 @@ function head(tag, it) {
 function rowOf(buttons) { return el('div', { className: 'row' }, buttons); }
 
 /* every rating card: short by default, and a confusing mark beside a number or instead of one. Both reach the result. */
-function newCard(expandable) { S.card = { expandable, expanded: false, confused: false }; }
+function newCard(expandable) { S.card = { expandable, expanded: false, confused: false, seed: false, noteEl: null }; }
 function more(kids, onToggle) {
   const body = el('div', { className: 'morebody', hidden: true }, kids);
   const b = el('button', { type: 'button', className: 'linky morebtn', textContent: 'more', onclick: () => {
@@ -467,7 +478,14 @@ function more(kids, onToggle) {
 function marks(it, noNumber, extra) {
   const flag = el('button', { type: 'button', className: 'pill', textContent: '+ confusing', onclick: () => { S.card.confused = !S.card.confused; flag.classList.toggle('on', S.card.confused); } });
   const idk = el('button', { type: 'button', className: 'pill', textContent: 'idk, confusing', onclick: () => { S.card.confused = true; file(it, noNumber(), extra); } });
-  return el('div', { className: 'marks' }, flag, idk);
+  // a note goes with whatever he taps next, or alone; closed until he wants it, so a one-tap rating stays one tap
+  const box = el('textarea', { className: 'notebox', placeholder: 'Your note', maxLength: 800, rows: 2 });
+  S.card.noteEl = box;
+  const seed = el('button', { type: 'button', className: 'pill', textContent: 'make this a seed', onclick: () => { S.card.seed = !S.card.seed; seed.classList.toggle('on', S.card.seed); } });
+  const alone = el('button', { type: 'button', className: 'pill', textContent: 'just the note', onclick: () => { if (box.value.trim()) file(it, noNumber(), extra || 'noteonly'); else box.focus(); } });
+  const panel = el('div', { hidden: true }, box, el('div', { className: 'marks' }, seed, alone));
+  const add = el('button', { type: 'button', className: 'pill', textContent: '+ note', onclick: () => { panel.hidden = !panel.hidden; add.classList.toggle('on', !panel.hidden || !!box.value.trim()); if (!panel.hidden) box.focus(); } });
+  return el('div', null, panel, el('div', { className: 'marks' }, add, flag, idk));
 }
 
 /* every result goes through here: stored and marked done in one transaction before the screen says FILED */
@@ -479,32 +497,44 @@ async function file(it, data, extra) {
     const card = S.card || {};
     if (card.confused) data = { ...data, confused: true };
     if (card.expandable) data = { ...data, expanded: !!card.expanded };
+    const text = card.noteEl ? card.noteEl.value.trim() : '';
+    if (text) data = { ...data, note: text, ...(card.seed ? { seed: true } : {}) };
+    const noteOnly = extra === 'noteonly' && !card.confused;   // not an answer: the card comes back for a number
     const row = { id: newId(), v: 1, player: S.player, kind: it.kind, item: it.id, ts: new Date().toISOString(), app: APP_VERSION, backlog: S.backlog && S.backlog.build, data };
     await tx(['results', 'done', 'kv'], 'readwrite', t => {
       t.objectStore('results').put({ id: row.id, row, sent_at: null, sends: 0 });
-      t.objectStore('done').put(true, it.id);
+      if (!noteOnly) t.objectStore('done').put(true, it.id);
       if (extra === 'endplay') t.objectStore('kv').delete('session');
     });
+    if (noteOnly) { const list = (await kvGet('skipped')) || []; if (!list.includes(it.id)) list.push(it.id); await kvSet('skipped', list); }
     await stampAndGo();
-    $('#hint').textContent = 'Filed. One more?';
+    $('#hint').textContent = noteOnly ? 'Note kept. The card comes back later.' : 'Filed. One more?';
     sync();
   } finally { filing = false; }
 }
 
+const axesList = () => (S.backlog && S.backlog.axes) || [['unique', 'Uniqueness'], ['useful', 'Usefulness']];
 function ticketIdea(it) {
   newCard(true);
-  const pick = { r: null };
+  const pick = { r: null, axes: {} };
   const nums = [1, 2, 3, 4, 5].map(n => btn(String(n), () => choose(n), 'num'));
-  const controls = el('div', { className: 'controls' }, el('p', { className: 'ask', textContent: 'How good?' }), rowOf(nums),
-    el('div', { className: 'scale' }, el('span', { textContent: 'nah' }), el('span', { textContent: 'love it' })),
+  const axes = el('div', { hidden: true }, axesList().map(([key, label]) => {   // optional, one tap away; the overall number stays the score
+    const bs = [1, 2, 3, 4, 5].map(n => btn(String(n), () => { pick.axes[key] = n; bs.forEach((b, i) => b.classList.toggle('on', i === n - 1)); }, 'num small'));
+    return el('div', { className: 'axisrow' }, el('span', { className: 'axislabel', textContent: label }), rowOf(bs));
+  }));
+  const controls = el('div', { className: 'controls' },
+    el('div', { className: 'askrow' }, el('p', { className: 'ask', textContent: 'How good?' }), el('button', { type: 'button', className: 'linky', textContent: 'more scores', onclick: () => { axes.hidden = !axes.hidden; } })),
+    rowOf(nums),
+    el('div', { className: 'scale' }, el('span', { textContent: 'nah' }), el('span', { textContent: 'love it' })), axes,
     marks(it, () => ({ r: null, ok: null, category: it.category || 'unknown' })));
   function choose(n) {
     pick.r = n;
     nums.forEach((b, i) => b.classList.toggle('on', i === n - 1));
     if (!controls.querySelector('.approve')) {
-      const send = ok => file(it, { r: pick.r, ok, category: it.category || 'unknown' });
+      const send = ok => file(it, { r: pick.r, ok, category: it.category || 'unknown', ...(Object.keys(pick.axes).length ? { axes: pick.axes } : {}) });
       controls.append(el('div', { className: 'approve' }, el('p', { className: 'ask', style: 'margin-top:12px', textContent: 'Approve it?' }),
-        rowOf([btn('Approve', () => send(true)), btn('Deny', () => send(false)), btn('Neither', () => send(null))])));
+        rowOf([btn('Approve → review', () => send(true)), btn('Deny', () => send(false)), btn('Neither', () => send(null))])));
+      controls.scrollTop = controls.scrollHeight;
     }
   }
   showSheet(head({ business: 'Business idea', tech: 'Tech idea' }[it.category] || 'Idea', it),
@@ -527,15 +557,21 @@ function ticketTech(it) {
 }
 function ticketMiss(it) {
   newCard(true);
-  const said = it.said_short || it.said, before = it.before_short || it.before;
-  const quote = para('quote', said), ctx = para('ctx', before);
+  const said = it.said_short || it.said, before = it.before_short || it.before, c = it.ctx;
+  const quote = para('quote', said), ctx = para('ctx', before), ctxLabel = el('p', { className: 'label', textContent: 'Before that' });
+  const line = m => el('p', { className: 'ctx' }, el('b', { textContent: m.who === 'you' ? 'You: ' : 'Agent: ' }), m.text);
+  const whenText = c && c.when ? new Date(c.when).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  const rest = c ? [
+    el('p', { className: 'label', textContent: 'What it was about' }), para('ctx', [whenText, c.about].filter(Boolean).join(' · ')),
+    (c.before || []).length ? [el('p', { className: 'label', textContent: 'The messages before' }), c.before.map(line)] : [],
+    (c.after || []).length ? [el('p', { className: 'label', textContent: 'What came after' }), c.after.map(line)] : [],
+  ] : (it.agent ? [el('p', { className: 'label', textContent: "The agent's last words" }), para('ctx', it.agent)] : []);
   showSheet(head('Real miss?', it),
     el('div', { className: 'scroll' },
       el('p', { className: 'label', textContent: it.interrupted ? 'You stopped the agent and said' : 'You said' }), quote,
-      el('p', { className: 'label', textContent: 'Before that' }), ctx,
-      more([it.agent ? [el('p', { className: 'label', textContent: "The agent's last words" }), para('ctx', it.agent)] : [],
-        el('p', { className: 'label', textContent: 'What counts as a miss' }), para('ctx', "Misunderstood it, ignored it, didn't do it, or you had to repeat it. Asking for changes to good work isn't a miss.")],
-      open => { quote.textContent = open ? it.said : said; ctx.textContent = open ? it.before : before; })),
+      ctxLabel, ctx,
+      more([rest, el('p', { className: 'label', textContent: 'What counts as a miss' }), para('ctx', "Misunderstood it, ignored it, didn't do it, or you had to repeat it. Asking for changes to good work isn't a miss.")],
+      open => { quote.textContent = open ? it.said : said; ctx.textContent = open ? it.before : before; const hide = open && !!c; ctx.hidden = hide; ctxLabel.hidden = hide; })),
     el('div', { className: 'controls' },
       el('p', { className: 'ask', textContent: 'Did the agent miss it?' }),
       rowOf([btn('Yes', () => file(it, { answer: 'yes' })), btn('No', () => file(it, { answer: 'no' })), btn('Unsure', () => file(it, { answer: 'unsure' }))]),
@@ -583,22 +619,21 @@ function fmtTime(ms) { const s = Math.round(ms / 1000); return Math.floor(s / 60
 function ticketAfterPlay(it, ms) {
   newCard(false);
   const pick = { fun: null, replay: null };
-  const go = btn('File it', () => file(it, { game: it.game, upload: it.upload, round: it.round, fun: pick.fun, replay: pick.replay, note: note.value.trim(), play_ms: Math.round(ms), broken: false }, 'endplay'), 'go');
+  const go = btn('File it', () => file(it, { game: it.game, upload: it.upload, round: it.round, fun: pick.fun, replay: pick.replay, play_ms: Math.round(ms), broken: false }, 'endplay'), 'go');
   go.disabled = true;
   const check = () => { go.disabled = !(pick.fun && pick.replay !== null); };
   const nums = [1, 2, 3, 4, 5].map(n => btn(String(n), () => { pick.fun = n; nums.forEach((b, i) => b.classList.toggle('on', i === n - 1)); check(); }, 'num'));
   const yes = btn('Yes', () => { pick.replay = true; yes.classList.add('on'); no.classList.remove('on'); check(); });
   const no = btn('No', () => { pick.replay = false; no.classList.add('on'); yes.classList.remove('on'); check(); });
-  const note = el('textarea', { placeholder: 'Anything to add? (optional)', maxLength: 500, rows: 2 });
   showSheet(
     el('div', { className: 'tick-head' }, el('span', { className: 'tag', textContent: it.title }), el('button', { type: 'button', className: 'linky', textContent: 'back to the game', onclick: () => startGame(it, ms) })),
     el('div', { className: 'scroll' },
       el('p', { className: 'ask', textContent: `You played ${fmtTime(ms)}. How fun?` }), rowOf(nums),
       el('div', { className: 'scale' }, el('span', { textContent: 'dull' }), el('span', { textContent: 'great' })),
-      marks(it, () => ({ game: it.game, upload: it.upload, round: it.round, fun: null, replay: null, note: note.value.trim(), play_ms: Math.round(ms), broken: false }), 'endplay'),
-      el('p', { className: 'ask', style: 'margin-top:14px', textContent: 'Play it again?' }), rowOf([yes, no]), note),
+      el('p', { className: 'ask', style: 'margin-top:14px', textContent: 'Play it again?' }), rowOf([yes, no]),
+      marks(it, () => ({ game: it.game, upload: it.upload, round: it.round, fun: null, replay: null, play_ms: Math.round(ms), broken: false }), 'endplay')),
     el('div', { className: 'controls' }, rowOf(go),
-      el('button', { type: 'button', className: 'linky', style: 'width:100%', textContent: "It didn't work", onclick: () => file(it, { game: it.game, upload: it.upload, round: it.round, fun: null, replay: null, note: note.value.trim(), play_ms: Math.round(ms), broken: true }, 'endplay') })));
+      el('button', { type: 'button', className: 'linky', style: 'width:100%', textContent: "It didn't work", onclick: () => file(it, { game: it.game, upload: it.upload, round: it.round, fun: null, replay: null, play_ms: Math.round(ms), broken: true }, 'endplay') })));
   $('#sheet').dataset.kind = 'afterplay';
 }
 
@@ -635,6 +670,45 @@ function gateInstall() {
     }, 'go')), copied,
     el('button', { type: 'button', className: 'linky', style: 'width:100%;margin-top:6px', textContent: 'Stay in Safari for now', onclick: async () => { await kvSet('browser_ok', true); hideSheet('off'); ensurePack(); } })));
   $('#sheet').dataset.kind = 'install';
+}
+/* the stash: what he neither approved nor denied, and what he denied. Nothing vanishes and nothing starts from here. Works offline: it's in the saved backlog, plus what hasn't been sent yet */
+async function stashItems() {
+  const b = S.backlog || {}, stash = b.stash || {};
+  const rows = (await allResults()).map(r => r.row).filter(r => r.kind === 'idea');
+  const promoted = new Set(rows.filter(r => r.data && r.data.promote).map(r => r.item));
+  const known = new Set([...(stash.neither || []), ...(stash.denied || [])].map(e => e.id));
+  const deck = new Map((b.deck || []).map(i => [i.id, i]));
+  const out = { neither: [...(stash.neither || [])], denied: [...(stash.denied || [])] };
+  for (const r of rows) {
+    const d = r.data || {}, it = deck.get(r.item);
+    if (known.has(r.item) || !it || d.promote || d.ok === true || (d.r == null && d.ok == null && !d.confused)) continue;
+    known.add(r.item);
+    (d.ok === false ? out.denied : out.neither).push({ id: r.item, idea: it.idea, why: it.why, topic: it.topic, category: it.category, r: d.r, axes: d.axes || {}, confused: !!d.confused });
+  }
+  out.neither = out.neither.filter(e => !promoted.has(e.id));
+  out.denied = out.denied.filter(e => !promoted.has(e.id));
+  return out;
+}
+async function promote(e) {
+  const row = { id: newId(), v: 1, player: S.player, kind: 'idea', item: e.id, ts: new Date().toISOString(), app: APP_VERSION, backlog: S.backlog && S.backlog.build, data: { promote: true, category: e.category || 'unknown' } };
+  await tx(['results'], 'readwrite', t => t.objectStore('results').put({ id: row.id, row, sent_at: null, sends: 0 }));
+  sync();
+}
+async function stashView(tab, sort) {
+  const lists = await stashItems();
+  const value = e => (sort === 'r' ? e.r : (e.axes || {})[sort]);
+  const items = lists[tab].slice().sort((a, b) => (value(b) == null ? -1 : value(b)) - (value(a) == null ? -1 : value(a)));
+  const pill = (text, on, onclick) => { const p = el('button', { type: 'button', className: 'pill' + (on ? ' on' : ''), textContent: text, onclick }); return p; };
+  const names = (S.backlog && S.backlog.axes) || axesList();
+  const row = e => el('div', { className: 'stashrow' },
+    para('score', [e.r != null ? String(e.r) : 'no number', ...names.filter(([k]) => (e.axes || {})[k] != null).map(([k, l]) => `${l.toLowerCase()} ${e.axes[k]}`), ...(e.confused ? ['confusing'] : [])].join(' · ')),
+    para('text', e.idea),
+    btn('Approve → review', async () => { await promote(e); $('#hint').textContent = 'Added to your review list.'; stashView(tab, sort); }, 'small'));
+  showSheet(el('div', { className: 'tick-head' }, el('span', { className: 'tag', textContent: 'Stash' }), el('button', { type: 'button', className: 'linky', textContent: 'close', onclick: () => hideSheet('off') })),
+    el('div', { className: 'sorts' }, pill(`Neither ${lists.neither.length}`, tab === 'neither', () => stashView('neither', sort)), pill(`Denied ${lists.denied.length}`, tab === 'denied', () => stashView('denied', sort))),
+    el('div', { className: 'sorts' }, pill('Overall', sort === 'r', () => stashView(tab, 'r')), names.map(([k, l]) => pill(l, sort === k, () => stashView(tab, k)))),
+    el('div', { className: 'scroll' }, items.length ? items.map(row) : para('why', tab === 'neither' ? 'Nothing here yet. Ideas you neither approve nor deny land here.' : 'Nothing denied yet.')));
+  $('#sheet').dataset.kind = 'stash';
 }
 async function details() {
   const done = await doneSet(), pool = poolOf(done), rows = await allResults();
@@ -676,6 +750,7 @@ async function boot() {
   $('#big').onclick = press;
   $('#done').onclick = endGame;
   $('#more').onclick = details;
+  $('#stash').onclick = () => stashView('neither', 'r');
   window.addEventListener('online', () => { S.online = true; sync(); });
   window.addEventListener('offline', () => { S.online = false; refresh(); });
   document.addEventListener('visibilitychange', () => { playTick(); if (!document.hidden) sync(); });
