@@ -139,7 +139,7 @@ textarea{height:70px;resize:none}
 <section id="player" hidden><div id="playbar"><span id="playtitle"></span><button id="done" type="button">DONE</button></div></section>
 <script>
 'use strict';
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 const RESEND_MS = 6 * 3600e3;      // the channel keeps a message 12 h; a result the PC hasn't confirmed goes again
 const MAX_SENDS = 40;              // per sync; the channel allows 250 a day
 const SEND_TIMEOUT = 20000;
@@ -426,12 +426,13 @@ async function pressOnce() {
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const word = $('#bigword'), small = $('#bigsmall'), said = small.textContent;
     small.textContent = '';
-    for (const w of ['IDEA?', 'GAME?', 'MISS?', 'IDEA?', 'GAME?', 'MISS?']) { word.textContent = w; await sleep(70); }
+    for (const w of ['IDEA?', 'GAME?', 'MISS?', 'TECH?', 'IDEA?', 'GAME?']) { word.textContent = w; await sleep(70); }
     small.textContent = said;
     word.textContent = 'PRESS';
   } else await sleep(150);
   b.classList.remove('down');
-  ({ idea: ticketIdea, miss: ticketMiss, game: ticketGame })[it.kind](it);
+  const show = { idea: ticketIdea, miss: ticketMiss, game: ticketGame, 'tech-score': ticketTech }[it.kind];
+  if (show) show(it); else await skip(it);     // a kind from a newer backlog than this app: skipped, not crashed on
 }
 async function skip(it) {
   const list = (await kvGet('skipped')) || [];
@@ -447,16 +448,21 @@ function head(tag, it) {
 function rowOf(buttons) { return el('div', { className: 'row' }, buttons); }
 
 /* every result goes through here: stored and marked done in one transaction before the screen says FILED */
+let filing = false;
 async function file(it, data, extra) {
-  const row = { id: newId(), v: 1, player: S.player, kind: it.kind, item: it.id, ts: new Date().toISOString(), app: APP_VERSION, backlog: S.backlog && S.backlog.build, data };
-  await tx(['results', 'done', 'kv'], 'readwrite', t => {
-    t.objectStore('results').put({ id: row.id, row, sent_at: null, sends: 0 });
-    t.objectStore('done').put(true, it.id);
-    if (extra === 'endplay') t.objectStore('kv').delete('session');
-  });
-  await stampAndGo();
-  $('#hint').textContent = 'Filed. One more?';
-  sync();
+  if (filing) return;       // a double tap files once
+  filing = true;
+  try {
+    const row = { id: newId(), v: 1, player: S.player, kind: it.kind, item: it.id, ts: new Date().toISOString(), app: APP_VERSION, backlog: S.backlog && S.backlog.build, data };
+    await tx(['results', 'done', 'kv'], 'readwrite', t => {
+      t.objectStore('results').put({ id: row.id, row, sent_at: null, sends: 0 });
+      t.objectStore('done').put(true, it.id);
+      if (extra === 'endplay') t.objectStore('kv').delete('session');
+    });
+    await stampAndGo();
+    $('#hint').textContent = 'Filed. One more?';
+    sync();
+  } finally { filing = false; }
 }
 
 function ticketIdea(it) {
@@ -468,14 +474,23 @@ function ticketIdea(it) {
     pick.r = n;
     nums.forEach((b, i) => b.classList.toggle('on', i === n - 1));
     if (!controls.querySelector('.approve')) {
+      const send = ok => file(it, { r: pick.r, ok, category: it.category || 'unknown' });
       controls.append(el('div', { className: 'approve' }, el('p', { className: 'ask', style: 'margin-top:12px', textContent: 'Approve it?' }),
-        rowOf([btn('Approve', () => file(it, { r: pick.r, ok: true })), btn('Deny', () => file(it, { r: pick.r, ok: false })), btn('Just the number', () => file(it, { r: pick.r, ok: null }))])));
+        rowOf([btn('Approve', () => send(true)), btn('Deny', () => send(false)), btn('Just the number', () => send(null))])));
     }
   }
-  showSheet(head('Rate this idea', it),
+  showSheet(head({ business: 'Rate this business idea', tech: 'Rate this tech idea' }[it.category] || 'Rate this idea', it),
     el('div', { className: 'scroll' }, it.topic ? el('p', { className: 'topic' }, el('b', { textContent: 'Topic: ' }), it.topic) : '', para('big-text', it.idea), it.why ? para('why', 'Why: ' + it.why) : ''),
     controls);
   $('#sheet').dataset.kind = 'idea';
+}
+function ticketTech(it) {
+  showSheet(head('Score this tech', it),
+    el('div', { className: 'scroll' }, para('big-text', it.title), para('why', it.about)),
+    el('div', { className: 'controls' }, el('p', { className: 'ask', textContent: 'How good is it?' }),
+      rowOf([1, 2, 3, 4, 5].map(n => btn(String(n), () => file(it, { r: n, tech: it.tech }), 'num'))),
+      el('div', { className: 'scale' }, el('span', { textContent: 'nah' }), el('span', { textContent: 'love it' }))));
+  $('#sheet').dataset.kind = 'tech-score';
 }
 function ticketMiss(it) {
   showSheet(head('Real miss?', it),
@@ -507,6 +522,7 @@ function playTick() {
 }
 let playTimer = null;
 async function startGame(it, acc) {
+  if (S.play) return;
   hideSheet('off');
   S.play = { item: it, acc: acc || 0, last: performance.now() };
   await kvSet('session', { item: it, acc: acc || 0 });
@@ -587,7 +603,7 @@ async function details() {
   try { if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); used = (e.usage / 1048576).toFixed(0) + ' MB'; } } catch (e) {}
   const kv = (a, b) => el('div', { className: 'kv' }, el('span', { textContent: a }), el('span', { textContent: b }));
   showSheet(head('Details'),
-    el('div', { className: 'scroll' }, kv('Ideas left', String(count('idea'))), kv('Real-miss calls left', String(count('miss'))),
+    el('div', { className: 'scroll' }, kv('Ideas left', String(count('idea'))), kv('Real-miss calls left', String(count('miss'))), kv('Technologies left', String(count('tech-score'))),
       kv('Games left', `${count('game')}${S.gamesReady ? '' : ' (not on this phone yet)'}`), kv('Sent, not yet confirmed', String(rows.filter(r => r.sent_at).length)),
       kv('Backlog built', S.backlog ? ago(S.backlog.built_at) : 'never'), kv('Storage used', used || 'unknown'), kv('Storage', storage), kv('Playing as', S.player), kv('Version', APP_VERSION)),
     el('div', { className: 'controls' }, rowOf([btn('Sync now', () => { hideSheet('off'); sync(); }), btn('Close', () => hideSheet('off'))]),
