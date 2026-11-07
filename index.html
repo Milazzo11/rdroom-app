@@ -132,37 +132,91 @@ textarea{height:70px;resize:none}
 #done{padding:8px 16px;border:2.5px solid #efe6d2;border-radius:20px;background:var(--brass);color:#1f1b16;font:800 15px/1 var(--cond);letter-spacing:.08em}
 @media (prefers-reduced-motion:reduce){.sheet,#big{transition:none}#stamp.hit{animation-duration:.01s}}
 @media (max-height:640px){.big-text{font-size:19px}.quote{font-size:18px}.btn{min-height:48px}.g b{font-size:20px}}
+
+/* round 1.4 */
+.chat{margin:0 0 6px;padding:7px 10px;border-radius:10px;font-size:15px;line-height:1.35;background:var(--enamel2)}
+.chat.you{border-left:5px solid var(--brass)}.chat.agent{border-left:5px solid var(--teal);opacity:.92}
+.chat.hot{background:var(--brass);color:#1f1b16;font-weight:600}
+.plain{margin:0 0 10px;padding:8px 10px;border-left:5px solid var(--teal);background:var(--enamel2);border-radius:0 8px 8px 0;font-size:16px;line-height:1.35}
+.intro{margin:0 0 8px;color:var(--soft);font-size:14px;line-height:1.35}
+.qcard{padding:14px 0 12px;border-bottom:2px dashed var(--paperline)}
+.qcard .tag.small{font-size:12px;padding:3px 6px}
+.qcard .big-text{margin-top:10px}
+.qcard .ctl{margin-top:10px}
+.stack{flex-direction:column}
+.btn.opt{min-height:48px;font-size:17px;text-align:left;padding:8px 14px}
+.terms{margin:8px 0;padding:8px 10px;border-radius:8px;background:var(--enamel2);font-size:14px;line-height:1.35}
+.term i{font-style:normal;font-weight:700}
+.axes{margin-top:10px}.axes summary{color:var(--soft);font-size:14px;padding:6px 0}
+.skipbtn{display:block;margin:2px 0 0 -8px}
+.submitbar{border-top:2px dashed var(--paperline)}
+.status-line{margin:0 0 8px;font-size:14px;line-height:1.3;color:var(--soft)}
+.dots{display:flex;gap:6px;margin:0 0 4px}
+.dot{flex:1;text-align:center;font:700 12px/1 var(--cond);letter-spacing:.1em;text-transform:uppercase;padding:6px 0;border-radius:12px;background:var(--enamel2);color:var(--soft)}
+.dot.on{background:var(--tomato);color:#fff4e0}.dot.done{background:var(--teal);color:#fff}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:300px;margin:16px auto}
+.cell{aspect-ratio:1;border:3px solid var(--ink);border-radius:14px;background:var(--enamel2);box-shadow:0 4px 0 var(--ink);transition:background .12s,transform .06s}
+.cell.lit{background:var(--digit);box-shadow:0 0 18px var(--digit),0 4px 0 var(--ink)}
+.cell:active{transform:translateY(3px)}
+.hrow{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;padding:12px 4px;border:0;border-bottom:2px dashed var(--paperline);background:none;color:var(--ink)}
+.hrow .htext{font-size:16px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hrow .hans{font:600 13px/1.2 ui-monospace,Menlo,monospace;color:var(--soft)}
+.hrow .tag.small{align-self:flex-start;font-size:11px;padding:2px 5px}
+@media (prefers-reduced-motion:reduce){.cell{transition:none}}
+
+/* reels (1.4.0): the machine becomes a slim bar over a vertical feed */
+#machine{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:calc(env(safe-area-inset-top) + 6px) 0 0;background:var(--enamel)}
+#top{display:flex;align-items:center;gap:8px;padding:0 10px}
+.plate{padding:3px 8px;gap:6px;border-width:2px;box-shadow:0 2px 0 var(--ink)}
+.plate h1{font-size:14px}.rivet{width:6px;height:6px}
+.gauges{flex:1;max-width:none;gap:4px}
+.g{padding:3px 2px;border-width:2px;border-radius:6px}
+.g b{font-size:15px}.g b.small{font-size:11px;line-height:1.5}
+.g span{font-size:8px;margin-top:1px}
+#top .links{display:flex;flex-direction:column;gap:0}
+#top .more-link{padding:1px 6px;font-size:12px}
+#status{margin:2px 10px 0;min-height:0;font-size:11px;line-height:1.25;text-align:left;max-width:none}
+#hint{margin:0 10px;min-height:0;font-size:12px;text-align:left}
+#feed{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:y mandatory;overscroll-behavior:contain;border-top:2px solid var(--ink);margin-top:4px;background:var(--enamel2)}
+.reel{height:var(--fh,70vh);display:flex;flex-direction:column;scroll-snap-align:start;scroll-snap-stop:always;background:var(--paper);color:var(--ink);margin-bottom:6px}
+.reel-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 16px 10px}
+.reel-foot{padding:8px 16px calc(env(safe-area-inset-bottom) + 10px);border-top:2px dashed var(--paperline);background:var(--paper)}
+.reel.dirty .reel-foot{background:var(--enamel2)}
+.reel.end .reel-body,.reel.puzzle .reel-body{display:flex;flex-direction:column;justify-content:center}
+.reel.puzzle .tag{align-self:flex-start;margin-bottom:6px}
+.feed-marker{display:none}
+.reel .qcard{border-bottom:0}
+@media (max-width:360px){.plate h1{font-size:12px;letter-spacing:.08em}.plate .rivet{display:none}.g span{display:none}.g b{font-size:14px}.g b.small{font-size:10px}#top{gap:5px;padding:0 6px}}
 </style>
 </head>
 <body>
 <main id="machine">
-  <div class="plate"><span class="rivet"></span><h1>R&amp;D ROOM</h1><span class="rivet"></span></div>
-  <div class="stage">
-    <div class="bezel"><button id="big" type="button"><span id="bigword">PRESS</span><small id="bigsmall">one random thing</small></button></div>
-    <div class="slot" aria-hidden="true"></div>
-    <p id="hint"></p>
-  </div>
-  <section class="gauges" aria-label="Sync status">
-    <div class="g"><b id="gReady">0</b><span>Ready offline</span></div>
-    <div class="g"><b id="gWait">0</b><span>Waiting to sync</span></div>
-    <div class="g"><b id="gLast" class="small">never</b><span>Last synced</span></div>
-  </section>
+  <header id="top">
+    <div class="plate"><span class="rivet"></span><h1>R&amp;D ROOM</h1><span class="rivet"></span></div>
+    <section class="gauges" aria-label="Sync status">
+      <div class="g"><b id="gReady">0</b><span>Ready offline</span></div>
+      <div class="g"><b id="gWait">0</b><span>Waiting to sync</span></div>
+      <div class="g"><b id="gLast" class="small">never</b><span>Last synced</span></div>
+    </section>
+    <div class="links"><button id="stash" class="more-link" type="button">stash</button><button id="more" class="more-link" type="button">details</button></div>
+  </header>
   <p id="status" role="status"></p>
-  <div class="links"><button id="stash" class="more-link" type="button">stash</button><button id="more" class="more-link" type="button">details</button></div>
+  <p id="hint"></p>
+  <div id="feed" tabindex="-1"></div>
 </main>
 <section id="sheet" class="sheet off" hidden></section>
 <div id="stamp" aria-hidden="true">FILED</div>
 <section id="player" hidden><div id="playbar"><span id="playtitle"></span><button id="done" type="button">DONE</button></div></section>
 <script>
 'use strict';
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 const RESEND_MS = 6 * 3600e3;      // the channel keeps a message 12 h; a result the PC hasn't confirmed goes again
 const MAX_SENDS = 40;              // per sync; the channel allows 250 a day
 const SEND_TIMEOUT = 20000;
 
 const $ = s => document.querySelector(s);
 const enc = new TextEncoder(), dec = new TextDecoder();
-const S = { keys: null, backlog: null, player: 'overseer', online: navigator.onLine, syncing: false, gamesReady: false, pack: null, packMsg: '', ticket: false, play: null, syncErr: '' };
+const S = { round: null, keys: null, backlog: null, player: 'overseer', online: navigator.onLine, syncing: false, gamesReady: false, pack: null, packMsg: '', ticket: false, play: null, syncErr: '' };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /* ---------- base64url + crypto: rdroom/crypto.py is the other half ---------- */
@@ -371,9 +425,6 @@ async function refresh() {
     $('#gReady').textContent = ready;
     $('#gWait').textContent = waiting;
     $('#gLast').textContent = ago(last);
-    $('#big').classList.toggle('empty', ready === 0);
-    $('#bigword').textContent = ready ? 'PRESS' : 'EMPTY';
-    $('#bigsmall').textContent = ready ? 'one random thing' : (S.backlog ? 'nothing left yet' : 'open online once');
     let msg;
     if (!S.backlog && !S.online) msg = 'Open this once with service to load the backlog.';
     else if (S.syncing && S.online) msg = 'Syncing…';
@@ -391,7 +442,7 @@ async function refresh() {
 }
 setInterval(refresh, 30000);
 
-const el = (tag, props, ...kids) => { const e = document.createElement(tag); Object.assign(e, props || {}); kids.flat(Infinity).forEach(k => e.append(k)); return e; };
+const el = (tag, props, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(props || {})) { if (k.includes('-')) e.setAttribute(k, v); else e[k] = v; } kids.flat(Infinity).forEach(k => e.append(k)); return e; };
 const para = (cls, text) => el('p', { className: cls, textContent: text });
 const btn = (text, onclick, cls) => el('button', { type: 'button', className: 'btn ' + (cls || ''), textContent: text, onclick });
 
@@ -410,7 +461,7 @@ function hideSheet(how) {
   setTimeout(() => { if (!S.ticket) { sh.hidden = true; sh.classList.remove('away'); sh.classList.add('off'); sh.replaceChildren(); reloadIfIdle(); } }, 340);
   refresh();
 }
-function reloadIfIdle() { if (S.newShell && !S.ticket && !S.play) location.reload(); }   // a new version waits for a free moment, never interrupts a ticket or a game
+function reloadIfIdle() { if (S.newShell && !S.ticket && !S.play && !document.querySelector('.reel.dirty')) location.reload(); }   // a new version waits for a free moment, never interrupts a ticket or a game
 async function stampAndGo() {
   const st = $('#stamp');
   st.classList.remove('hit'); void st.offsetWidth; st.classList.add('hit');
@@ -420,170 +471,320 @@ async function stampAndGo() {
   st.classList.remove('hit');
 }
 
-let pressing = false;
-async function press() {
-  if (S.ticket || pressing) return;
-  pressing = true;
-  try { await pressOnce(); } finally { pressing = false; }
-}
-async function pressOnce() {
-  const b = $('#big');
-  const done = await doneSet();
-  let pool = poolOf(done).filter(i => i.kind !== 'game' || S.gamesReady);
-  if (!pool.length) {
-    $('#hint').textContent = S.backlog ? 'Nothing left. R&D owes you more.' : 'Open this once with service to load the backlog.';
-    return;
-  }
-  const skipped = new Set((await kvGet('skipped')) || []);
-  let it = pool.find(i => !skipped.has(i.id));
-  if (!it) { await kvSet('skipped', []); it = pool[0]; }
-  b.classList.add('down');
-  $('#hint').textContent = '';
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const word = $('#bigword'), small = $('#bigsmall'), said = small.textContent;
-    small.textContent = '';
-    for (const w of ['IDEA?', 'GAME?', 'MISS?', 'TECH?', 'IDEA?', 'GAME?']) { word.textContent = w; await sleep(70); }
-    small.textContent = said;
-    word.textContent = 'PRESS';
-  } else await sleep(150);
-  b.classList.remove('down');
-  const show = { idea: ticketIdea, miss: ticketMiss, game: ticketGame, 'tech-score': ticketTech }[it.kind];
-  if (show) show(it); else await skip(it);     // a kind from a newer backlog than this app: skipped, not crashed on
+/* ---------- the feed: vertical full-screen reels. Scroll down for the next thing, scroll up for what you did before: that IS the history ---------- */
+const CARD_KINDS = ['idea', 'miss', 'tech-score', 'profile', 'game'];
+const PAGE = 6;                 // reels added each time he nears the end
+const PAST_SHOWN = 40;          // earlier answers drawn at first; "earlier" brings more
+const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const feedEl = () => $('#feed');
+function sizeFeed() { const f = feedEl(); if (f) f.style.setProperty('--fh', f.clientHeight + 'px'); }
+async function stampOnly() {
+  const st = $('#stamp');
+  st.classList.remove('hit'); void st.offsetWidth; st.classList.add('hit');
+  await sleep(430);
+  st.classList.remove('hit');
 }
 async function skip(it) {
   const list = (await kvGet('skipped')) || [];
   if (!list.includes(it.id)) list.push(it.id);
   await kvSet('skipped', list);
-  hideSheet('off');
 }
-function head(tag, it) {
+function head(tag, back) {
   const h = el('div', { className: 'tick-head' }, el('span', { className: 'tag', textContent: tag }));
-  if (it) h.append(el('button', { type: 'button', className: 'linky', textContent: 'not now', onclick: () => skip(it) }));
+  if (back) h.append(el('button', { type: 'button', className: 'linky', textContent: back.text || 'close', onclick: back.fn || (() => hideSheet('off')) }));
   return h;
 }
 function rowOf(buttons) { return el('div', { className: 'row' }, buttons); }
 
-/* every rating card: short by default, and a confusing mark beside a number or instead of one. Both reach the result. */
-function newCard(expandable) { S.card = { expandable, expanded: false, confused: false, seed: false, noteEl: null }; }
-function more(kids, onToggle) {
-  const body = el('div', { className: 'morebody', hidden: true }, kids);
-  const b = el('button', { type: 'button', className: 'linky morebtn', textContent: 'more', onclick: () => {
-    body.hidden = !body.hidden;
-    b.textContent = body.hidden ? 'more' : 'less';
-    if (!body.hidden) S.card.expanded = true;
-    if (onToggle) onToggle(!body.hidden);
-  } });
-  return [b, body];
-}
-function marks(it, noNumber, extra) {
-  const flag = el('button', { type: 'button', className: 'pill', textContent: '+ confusing', onclick: () => { S.card.confused = !S.card.confused; flag.classList.toggle('on', S.card.confused); } });
-  const idk = el('button', { type: 'button', className: 'pill', textContent: 'idk, confusing', onclick: () => { S.card.confused = true; file(it, noNumber(), extra); } });
-  // a note goes with whatever he taps next, or alone; closed until he wants it, so a one-tap rating stays one tap
-  const box = el('textarea', { className: 'notebox', placeholder: 'Your note', maxLength: 800, rows: 2 });
-  S.card.noteEl = box;
-  const seed = el('button', { type: 'button', className: 'pill', textContent: 'make this a seed', onclick: () => { S.card.seed = !S.card.seed; seed.classList.toggle('on', S.card.seed); } });
-  const alone = el('button', { type: 'button', className: 'pill', textContent: 'just the note', onclick: () => { if (box.value.trim()) file(it, noNumber(), extra || 'noteonly'); else box.focus(); } });
-  const panel = el('div', { hidden: true }, box, el('div', { className: 'marks' }, seed, alone));
-  const add = el('button', { type: 'button', className: 'pill', textContent: '+ note', onclick: () => { panel.hidden = !panel.hidden; add.classList.toggle('on', !panel.hidden || !!box.value.trim()); if (!panel.hidden) box.focus(); } });
-  return el('div', null, panel, el('div', { className: 'marks' }, add, flag, idk));
+/* a reel for a card. opts: pre (his earlier answer), rid (the result a change names), past */
+function cardReel(it, opts) {
+  opts = opts || {};
+  const R = { it, rid: opts.rid || null, last: null, busy: false, part: null, played: it.kind !== 'game' || !!opts.pre };
+  const status = para('status-line', '');
+  const sub = btn('Submit', () => submit(), 'go');
+  const body = el('div', { className: 'reel-body' });
+  const foot = el('div', { className: 'reel-foot' }, status, rowOf(sub));
+  const node = el('section', { className: 'reel', 'data-item': it.id, 'data-kind': it.kind }, body, foot);
+  node._r = R;
+  const snap = () => { const c = R.part && R.part.collect(); return c ? JSON.stringify(c.data) : ''; };
+  function draw(ms) {
+    const card = it.kind === 'game' && ms != null ? { ...it, _ms: ms } : it;
+    R.part = cardEl(card, opts.pre);
+    R.last = opts.pre ? snap() : null;
+    body.replaceChildren(R.part.node);
+    if (!opts.past) {
+      const sk = el('button', { type: 'button', className: 'linky skipbtn', textContent: 'skip this one', onclick: async () => { await skip(it); next(); } });
+      body.append(sk);
+    }
+    foot.hidden = false;
+    update();
+  }
+  function update() {
+    if (!R.part) return;
+    const c = R.part.collect(), cur = snap(), saved = R.last != null;
+    node.classList.toggle('dirty', !!c && cur !== R.last);
+    node.classList.toggle('saved', saved);
+    const noteOnly = c && !c.answered;
+    if (!c) { sub.disabled = true; sub.textContent = saved ? 'Saved' : 'Submit'; status.textContent = saved ? 'Saved. Change it any time.' : 'Pick an answer, or just add a note. A note on its own is fine.'; }
+    else if (saved && cur === R.last) { sub.disabled = true; sub.textContent = 'Saved ✓'; status.textContent = 'Saved. Change it any time: the old answer is kept, the new one counts.'; }
+    else { sub.disabled = false; sub.textContent = saved ? 'Save change' : (noteOnly ? 'Submit note only' : 'Submit'); status.textContent = saved ? 'Changed. Save change keeps the old answer and counts the new one.' : (noteOnly ? 'Just a note sends fine; the card comes back later for an answer.' : 'Ready. Submit sends your answer' + (c.data.note ? ' and note.' : '. You can add a note first.')); }
+  }
+  node.addEventListener('input', update);
+  node.addEventListener('click', () => setTimeout(update, 0));
+  async function submit() {
+    if (R.busy) return;
+    const c = R.part.collect();
+    if (!c) return;
+    R.busy = true;
+    try {
+      const first = R.last == null;
+      const row = { id: newId(), v: 1, player: S.player, kind: it.kind, item: it.id, ts: new Date().toISOString(), app: APP_VERSION, backlog: S.backlog && S.backlog.build, ...(R.rid ? { amends: R.rid } : {}), data: c.data };
+      await tx(['results', 'done', 'kv'], 'readwrite', t => {
+        t.objectStore('results').put({ id: row.id, row, sent_at: null, sends: 0 });
+        if (c.answered) t.objectStore('done').put(true, it.id);
+        if (it.kind === 'game') t.objectStore('kv').delete('session');
+      });
+      if (!R.rid) R.rid = row.id;
+      R.last = JSON.stringify(c.data);
+      if (!c.answered && first) await skip(it);
+      await stampOnly();
+      $('#hint').textContent = first ? 'Filed.' : 'Changed. The old answer is kept, the new one counts.';
+      update();
+      sync();
+      if (first && c.answered) next();
+    } finally { R.busy = false; }
+  }
+  function next() { const n = node.nextElementSibling; if (n) n.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); }
+  R.afterPlay = ms => { draw(ms); };
+  if (!R.played) {                       // a real game: play first, then its questions
+    body.append(para('intro', it.intro || ''), para('big-text', it.title), para('why', it.blurb), it.round > 1 ? para('why', 'A second go.') : '',
+      para('why', 'Tap DONE when you’re done. The questions come after.'),
+      el('div', { className: 'row' }, btn('Play', () => startGame(it), 'go')),
+      el('button', { type: 'button', className: 'linky skipbtn', textContent: 'skip this one', onclick: async () => { await skip(it); next(); } }));
+    foot.hidden = true;
+  } else draw(opts.pre && it.kind === 'game' ? (opts.pre.play_ms || 0) : null);
+  return node;
 }
 
-/* every result goes through here: stored and marked done in one transaction before the screen says FILED */
-let filing = false;
-async function file(it, data, extra) {
-  if (filing) return;       // a double tap files once
-  filing = true;
-  try {
-    const card = S.card || {};
-    if (card.confused) data = { ...data, confused: true };
-    if (card.expandable) data = { ...data, expanded: !!card.expanded };
-    const text = card.noteEl ? card.noteEl.value.trim() : '';
-    if (text) data = { ...data, note: text, ...(card.seed ? { seed: true } : {}) };
-    const noteOnly = extra === 'noteonly' && !card.confused;   // not an answer: the card comes back for a number
-    const row = { id: newId(), v: 1, player: S.player, kind: it.kind, item: it.id, ts: new Date().toISOString(), app: APP_VERSION, backlog: S.backlog && S.backlog.build, data };
-    await tx(['results', 'done', 'kv'], 'readwrite', t => {
-      t.objectStore('results').put({ id: row.id, row, sent_at: null, sends: 0 });
-      if (!noteOnly) t.objectStore('done').put(true, it.id);
-      if (extra === 'endplay') t.objectStore('kv').delete('session');
-    });
-    if (noteOnly) { const list = (await kvGet('skipped')) || []; if (!list.includes(it.id)) list.push(it.id); await kvSet('skipped', list); }
-    await stampAndGo();
-    $('#hint').textContent = noteOnly ? 'Note kept. The card comes back later.' : 'Filed. One more?';
-    sync();
-  } finally { filing = false; }
+/* a puzzle between the questions: a 3x3 lights-out, always solvable (built by pressing from the solved board). Nothing is recorded: it is for fun, and you can replay it by scrolling back */
+function puzzleReel(n) {
+  let g, moves;
+  const msg = para('why', '');
+  const flip = i => { const x = i % 3, y = (i / 3) | 0; [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => { const a = x + dx, b = y + dy; if (a >= 0 && a < 3 && b >= 0 && b < 3) g[b * 3 + a] = !g[b * 3 + a]; }); };
+  const cells = Array.from({ length: 9 }, (_, i) => el('button', { type: 'button', className: 'cell', 'aria-label': 'light ' + (i + 1), onclick: () => {
+    if (!g.some(Boolean)) return;
+    flip(i); moves++; paint();
+    if (!g.some(Boolean)) msg.textContent = `Solved in ${moves} move${moves === 1 ? '' : 's'}. Nice. Scroll on, or tap New puzzle.`;
+  } }));
+  const paint = () => cells.forEach((c, i) => c.classList.toggle('lit', g[i]));
+  function fresh() {
+    g = Array(9).fill(false); moves = 0;
+    [0, 1, 2, 3, 4, 5, 6, 7, 8].sort(() => Math.random() - .5).slice(0, 4).forEach(flip);
+    if (!g.some(Boolean)) flip(4);
+    msg.textContent = 'Tap a light. It flips itself and its neighbors. Turn them all off.';
+    paint();
+  }
+  fresh();
+  return el('section', { className: 'reel puzzle', 'data-kind': 'warmup', 'data-item': 'puzzle:' + n },
+    el('div', { className: 'reel-body' }, el('span', { className: 'tag small', textContent: 'Just for fun' }), msg, el('div', { className: 'grid3' }, cells),
+      el('button', { type: 'button', className: 'linky', style: 'width:100%', textContent: 'New puzzle', onclick: fresh }),
+      para('intro', 'Nothing here is recorded.')));
+}
+function endReel() {
+  return el('section', { className: 'reel end', 'data-kind': 'end' }, el('div', { className: 'reel-body' },
+    para('big-text', S.backlog ? 'That’s everything for now.' : 'Open this once with service to load the questions.'),
+    para('why', 'R&D will send more. Scroll up to look at or change anything you did.'),
+    el('div', { className: 'row' }, btn('Check for more', async () => { await sync(); await buildFeed(); }, 'go'))));
+}
+
+/* what is in the feed: earlier answers (oldest first), then what is left, a puzzle after every fourth card */
+async function buildFeed() {
+  const f = feedEl();
+  if (!f || !db) return;
+  const done = await doneSet(), skipped = new Set((await kvGet('skipped')) || []);
+  const entries = await historyEntries();
+  const noteOnly = new Map(entries.filter(e => !isAnswer(e.kind, e.data)).map(e => [e.item, e]));
+  const past = entries.filter(e => isAnswer(e.kind, e.data) && done.has(e.item)).sort((a, b) => ((a.at || a.ts || '') < (b.at || b.ts || '') ? -1 : 1));
+  const pool = poolOf(done).filter(i => CARD_KINDS.includes(i.kind) && (i.kind !== 'game' || S.gamesReady));
+  const upcoming = pool.filter(i => !skipped.has(i.id)).concat(pool.filter(i => skipped.has(i.id)));
+  S.feed = { rest: upcoming.slice(), noteOnly, count: 0, puzzles: 0 };
+  const shown = past.slice(-PAST_SHOWN), hidden = past.length - shown.length;
+  const kids = [];
+  if (hidden > 0) kids.push(el('section', { className: 'reel end', 'data-kind': 'earlier' }, el('div', { className: 'reel-body' },
+    para('big-text', `${hidden} earlier answer${hidden === 1 ? '' : 's'}`), btn('Show earlier', () => showEarlier(past, hidden), 'go'))));
+  shown.forEach(e => kids.push(cardReel(e.card, { pre: e.data, rid: e.rid, past: true })));
+  f.replaceChildren(...kids);
+  const marker = el('div', { className: 'feed-marker', hidden: true });
+  f.append(marker);
+  more(true);
+  sizeFeed();
+  const first = marker.nextElementSibling;
+  f.scrollTop = first ? first.offsetTop : 0;
+  refresh();
+}
+function showEarlier(past, hidden) {
+  const f = feedEl(), lead = f.firstElementChild, h0 = f.scrollHeight, top0 = f.scrollTop;
+  const more = past.slice(Math.max(0, hidden - PAST_SHOWN), hidden), left = Math.max(0, hidden - PAST_SHOWN);
+  lead.before(...more.map(e => cardReel(e.card, { pre: e.data, rid: e.rid, past: true })));
+  if (left > 0) { lead.querySelector('.big-text').textContent = `${left} earlier answer${left === 1 ? '' : 's'}`; lead.querySelector('.btn').onclick = () => showEarlier(past, left); } else lead.remove();
+  f.scrollTop = top0 + (f.scrollHeight - h0);
+}
+function more(first) {
+  const F = S.feed, f = feedEl();
+  if (!F || F.ending) return;
+  const add = [];
+  for (let k = 0; k < PAGE && F.rest.length; k++) {
+    const it = F.rest.shift(), no = F.noteOnly.get(it.id);
+    add.push(cardReel(it, no ? { pre: no.data, rid: no.rid } : {}));
+    if (++F.count % 4 === 0 && F.rest.length) add.push(puzzleReel(++F.puzzles));
+  }
+  if (!F.rest.length) { add.push(endReel()); F.ending = true; }
+  f.append(...add);
+  sizeFeed();
+}
+function onFeedScroll() {
+  const f = feedEl();
+  if (S.feed && !S.feed.ending && f.scrollTop + f.clientHeight * 3 > f.scrollHeight) more();
+}
+function ticketAfterPlay(it, ms) {
+  let reel = [...feedEl().querySelectorAll('.reel')].find(r => r.dataset.item === it.id);
+  if (!reel) { reel = cardReel(it, {}); feedEl().querySelector('.feed-marker').after(reel); }
+  reel._r.afterPlay(ms);
+  reel.scrollIntoView({ block: 'start' });
+}
+
+const KIND_TAG = { idea: 'Idea', miss: 'Real miss?', 'tech-score': 'Our tech', game: 'Game', profile: 'About you' };
+const isAnswer = (kind, d) => kind === 'game' ? true : kind === 'profile' ? d.answer != null : kind === 'miss' ? d.answer != null : kind === 'idea' ? (d.r != null || d.ok != null) : d.r != null;
+
+/* one card: returns {node, collect()}. collect() gives the result data, or null when he gave neither an answer nor a note. Answers only select. */
+function selectRow(labels, values, get, set, cls) {
+  const bs = labels.map((l, i) => el('button', { type: 'button', className: 'btn ' + (cls || ''), textContent: l, onclick: () => { set(get() === values[i] ? null : values[i]); paint(); } }));
+  const paint = () => bs.forEach((b, i) => { b.classList.toggle('on', get() === values[i]); b.setAttribute('aria-pressed', String(get() === values[i])); });
+  paint();
+  return { node: rowOf(bs), paint };
+}
+function cardEl(it, pre) {
+  pre = pre || {};
+  const st = { expanded: false, seed: false, noteEl: null };
+  const q = text => el('p', { className: 'ask', textContent: text });
+  const scale = (labelLo, labelHi) => el('div', { className: 'scale' }, el('span', { textContent: labelLo }), el('span', { textContent: labelHi }));
+  const kids = [], intro = it.intro ? para('intro', it.intro) : '';
+  let build = () => null, body = [];
+  if (it.kind === 'idea') {
+    const p = { r: pre.r == null ? null : pre.r, ok: pre.ok === true ? 'a' : pre.ok === false ? 'd' : (pre.r != null ? 'n' : null), axes: { ...(pre.axes || {}) } };
+    const rr = selectRow(['1', '2', '3', '4', '5'], [1, 2, 3, 4, 5], () => p.r, v => { p.r = v; }, 'num');
+    const ok = selectRow(['Approve → review', 'Deny', 'Neither'], ['a', 'd', 'n'], () => p.ok, v => { p.ok = v; }, '');
+    ok.node.classList.add('stack');
+    const axes = el('details', { className: 'axes' }, el('summary', { textContent: 'Rate it more ways (optional)' }), axesList().map(([key, label]) => {
+      const r = selectRow(['1', '2', '3', '4', '5'], [1, 2, 3, 4, 5], () => p.axes[key] || null, v => { if (v) p.axes[key] = v; else delete p.axes[key]; }, 'num small');
+      return el('div', { className: 'axisrow' }, el('span', { className: 'axislabel', textContent: label }), r.node);
+    }));
+    if (Object.keys(p.axes).length) axes.open = true;
+    body = [para('big-text', it.idea), it.plain ? para('plain', 'In short: ' + it.plain) : '', it.why ? para('why', 'Why it was suggested: ' + it.why) : '', it.topic ? para('topic', 'Area: ' + it.topic) : ''];
+    kids.push(q('How good is this idea?'), rr.node, scale('nah', 'love it'), q('What should happen to it?'), ok.node, axes);
+    build = () => ({ r: p.r, ok: p.ok === 'a' ? true : p.ok === 'd' ? false : null, category: it.category || 'unknown', ...(Object.keys(p.axes).length ? { axes: p.axes } : {}) });
+    st.has = () => p.r != null || p.ok === 'a' || p.ok === 'd';
+  } else if (it.kind === 'tech-score') {
+    const p = { r: pre.r == null ? null : pre.r };
+    const rr = selectRow(['1', '2', '3', '4', '5'], [1, 2, 3, 4, 5], () => p.r, v => { p.r = v; }, 'num');
+    body = [para('big-text', it.title), para('why', it.about), it.plain ? para('plain', 'In short: ' + it.plain) : ''];
+    kids.push(q('How worthwhile is it?'), rr.node, scale('nah', 'love it'));
+    build = () => ({ r: p.r, tech: it.tech });
+    st.has = () => p.r != null;
+  } else if (it.kind === 'miss') {
+    const p = { answer: pre.answer || null };
+    const c = it.ctx;
+    /* the real conversation, always shown: what came before, the message itself, what happened next, with who said what */
+    const line = (m, hot) => el('p', { className: 'chat ' + (m.who === 'you' ? 'you' : 'agent') + (hot ? ' hot' : '') },
+      el('b', { textContent: (m.who === 'you' ? 'You' : 'Agent') + (hot ? ' (the message in question)' : '') + ': ' }), m.text);
+    const before = c && (c.before || []).length ? c.before : [...(it.before ? [{ who: 'you', text: it.before }] : []), ...(it.agent ? [{ who: 'agent', text: it.agent }] : [])];
+    const after = c && (c.after || []).length ? c.after : [];
+    const whenText = c && c.when ? new Date(c.when).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+    body = [para('label', ['A chat with an AI agent', whenText, c && c.about].filter(Boolean).join(' · ')), para('label', 'Just before'), before.map(m => line(m)),
+      para('label', it.interrupted ? 'Then you stopped the agent and said' : 'Then you said'), line({ who: 'you', text: it.said }, true),
+      after.length ? [para('label', 'What happened next'), after.map(m => line(m))] : para('why', '(Nothing was recorded after that.)'),
+      para('label', 'What counts as a miss'), para('ctx', "Misunderstood it, ignored it, didn't do it, or you had to repeat it. Asking for changes to good work isn't a miss.")];
+    st.expanded = true;
+    const rr = selectRow(['Yes', 'No', 'Unsure'], ['yes', 'no', 'unsure'], () => p.answer, v => { p.answer = v; }, '');
+    kids.push(q('Did the agent miss what you asked?'), rr.node);
+    build = () => ({ answer: p.answer });
+    st.has = () => p.answer != null;
+  } else if (it.kind === 'profile') {
+    const p = { a: pre.answer == null ? (it.qtype === 'multi' ? [] : null) : pre.answer };
+    body = [para('label', it.pack_title + (it.of ? ` · ${it.n} of ${it.of}` : '')), para('big-text', it.q), it.why ? para('why', 'Why we ask: ' + it.why) : ''];
+    if (it.qtype === 'multi') {
+      const bs = it.options.map(o => el('button', { type: 'button', className: 'btn opt', textContent: o, onclick: () => { p.a = p.a.includes(o) ? p.a.filter(x => x !== o) : p.a.concat(o); paint(); } }));
+      const paint = () => bs.forEach(b => { const on = p.a.includes(b.textContent); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+      paint(); kids.push(el('div', { className: 'stack' }, bs));
+    } else if (it.qtype === 'scale') {
+      const rr = selectRow(['1', '2', '3', '4', '5'], [1, 2, 3, 4, 5], () => p.a, v => { p.a = v; }, 'num');
+      kids.push(rr.node, scale(it.lo || '', it.hi || ''));
+    } else {
+      const rr = selectRow(it.options, it.options, () => p.a, v => { p.a = v; }, 'opt');
+      rr.node.classList.add('stack'); kids.push(rr.node);
+    }
+    build = () => ({ answer: Array.isArray(p.a) ? (p.a.length ? p.a : null) : p.a });
+    st.has = () => Array.isArray(p.a) ? p.a.length > 0 : p.a != null;
+  } else if (it.kind === 'game') {
+    const p = { fun: pre.fun || null, replay: pre.replay === undefined ? null : pre.replay, broken: !!pre.broken };
+    const ms = pre.play_ms != null ? pre.play_ms : (it._ms || 0);
+    const f = selectRow(['1', '2', '3', '4', '5'], [1, 2, 3, 4, 5], () => p.fun, v => { p.fun = v; if (v) { p.broken = false; bk.classList.remove('on'); } }, 'num');
+    const rp = selectRow(['Yes', 'No'], [true, false], () => p.replay, v => { p.replay = v; }, '');
+    const bk = el('button', { type: 'button', className: 'pill' + (p.broken ? ' on' : ''), textContent: "It didn't work", onclick: () => { p.broken = !p.broken; bk.classList.toggle('on', p.broken); } });
+    body = [para('big-text', it.title), para('why', `You played ${fmtTime(ms)}.`)];
+    kids.push(q('How fun was it?'), f.node, scale('dull', 'great'), q('Play it again some time?'), rp.node, el('div', { className: 'marks' }, bk));
+    build = () => ({ game: it.game, upload: it.upload, round: it.round, fun: p.fun, replay: p.replay, play_ms: Math.round(ms), broken: p.broken });
+    st.has = () => p.fun != null || p.replay !== null || p.broken;
+  }
+  /* terms and a note: any card can be annotated (this replaced the "confusing" button) */
+  const terms = (it.terms || []).length ? el('div', { className: 'terms' }, el('b', { textContent: 'Words used: ' }), it.terms.map(([t, d]) => el('span', { className: 'term' }, el('i', { textContent: t }), ' = ' + d + '. '))) : '';
+  const box = el('textarea', { className: 'notebox', placeholder: 'Your note', maxLength: 800, rows: 2, value: pre.note || '' });
+  st.noteEl = box;
+  const panel = el('div', { hidden: !pre.note }, box, it.kind === 'profile' ? '' : el('div', { className: 'marks' }, (() => {
+    const seed = el('button', { type: 'button', className: 'pill', textContent: 'make this a seed', onclick: () => { st.seed = !st.seed; seed.classList.toggle('on', st.seed); } }); return seed;
+  })()));
+  const add = el('button', { type: 'button', className: 'pill' + (pre.note ? ' on' : ''), textContent: pre.note ? 'Your note' : '+ Add a note', onclick: () => { panel.hidden = !panel.hidden; if (!panel.hidden) box.focus(); } });
+  const node = el('section', { className: 'qcard', 'data-kind': it.kind, 'data-qtype': it.qtype || '' }, el('span', { className: 'tag small', textContent: KIND_TAG[it.kind] || it.kind }), intro, body, terms, el('div', { className: 'ctl' }, kids), el('div', { className: 'marks' }, add), panel);
+  return {
+    node, item: it,
+    collect() {
+      const note = box.value.trim(), has = st.has();
+      if (!has && !note) return null;
+      let d = build();
+      if (it.kind === 'miss') d = { ...d, expanded: true };
+      if (note) d = { ...d, note, ...(st.seed ? { seed: true } : {}) };
+      return { data: d, answered: has && isAnswer(it.kind, d) };
+    },
+    has: () => st.has() || !!box.value.trim(),
+  };
 }
 
 const axesList = () => (S.backlog && S.backlog.axes) || [['unique', 'Uniqueness'], ['useful', 'Usefulness']];
-function ticketIdea(it) {
-  newCard(true);
-  const pick = { r: null, axes: {} };
-  const nums = [1, 2, 3, 4, 5].map(n => btn(String(n), () => choose(n), 'num'));
-  const axes = el('div', { hidden: true }, axesList().map(([key, label]) => {   // optional, one tap away; the overall number stays the score
-    const bs = [1, 2, 3, 4, 5].map(n => btn(String(n), () => { pick.axes[key] = n; bs.forEach((b, i) => b.classList.toggle('on', i === n - 1)); }, 'num small'));
-    return el('div', { className: 'axisrow' }, el('span', { className: 'axislabel', textContent: label }), rowOf(bs));
-  }));
-  const controls = el('div', { className: 'controls' },
-    el('div', { className: 'askrow' }, el('p', { className: 'ask', textContent: 'How good?' }), el('button', { type: 'button', className: 'linky', textContent: 'more scores', onclick: () => { axes.hidden = !axes.hidden; } })),
-    rowOf(nums),
-    el('div', { className: 'scale' }, el('span', { textContent: 'nah' }), el('span', { textContent: 'love it' })), axes,
-    marks(it, () => ({ r: null, ok: null, category: it.category || 'unknown' })));
-  function choose(n) {
-    pick.r = n;
-    nums.forEach((b, i) => b.classList.toggle('on', i === n - 1));
-    if (!controls.querySelector('.approve')) {
-      const send = ok => file(it, { r: pick.r, ok, category: it.category || 'unknown', ...(Object.keys(pick.axes).length ? { axes: pick.axes } : {}) });
-      controls.append(el('div', { className: 'approve' }, el('p', { className: 'ask', style: 'margin-top:12px', textContent: 'Approve it?' }),
-        rowOf([btn('Approve → review', () => send(true)), btn('Deny', () => send(false)), btn('Neither', () => send(null))])));
-      controls.scrollTop = controls.scrollHeight;
-    }
+
+/* ---------- history: everything he answered, newest first; tap to change. A change is a new result that names the old one; the PC keeps both ---------- */
+function summary(kind, d) {
+  const okText = d.ok === true ? 'approved' : d.ok === false ? 'denied' : d.r != null ? 'neither' : '';
+  if (kind === 'idea') return [d.r != null ? d.r + '/5' : 'no number', okText].filter(Boolean).join(' · ');
+  if (kind === 'tech-score') return d.r != null ? d.r + '/5' : 'no number';
+  if (kind === 'miss') return d.answer || 'no answer';
+  if (kind === 'game') return d.broken ? "didn't work" : [d.fun != null ? 'fun ' + d.fun + '/5' : '', d.replay === true ? 'would replay' : d.replay === false ? 'no replay' : ''].filter(Boolean).join(' · ') || 'played';
+  if (kind === 'profile') return Array.isArray(d.answer) ? d.answer.join(', ') : d.answer != null ? (typeof d.answer === 'number' ? d.answer + '/5' : String(d.answer)) : 'no answer';
+  return '';
+}
+const cardText = c => c.kind === 'idea' ? c.idea : c.kind === 'miss' ? 'You said: ' + (c.said_short || c.said) : c.kind === 'profile' ? c.q : c.kind === 'tech-score' ? c.title + ': ' + (c.short || c.about) : c.title;
+async function historyEntries() {
+  const b = S.backlog || {}, map = new Map();
+  (b.history || []).forEach(e => map.set(e.item, { ...e, local: false }));
+  const deck = new Map((b.deck || []).map(i => [i.id, i]));
+  const rows = (await allResults()).map(r => r.row).filter(r => !(r.data && r.data.promote)).sort((a, c) => (a.ts < c.ts ? -1 : 1));
+  for (const r of rows) {                                   // answers still waiting on this phone, newest last, so they win
+    const cur = map.get(r.item), card = (cur && cur.card) || deck.get(r.item);
+    if (!card) continue;
+    const answered = isAnswer(r.kind, r.data);
+    if (cur && !r.amends && !answered && isAnswer(cur.kind, cur.data)) continue;       // a later note never hides an answer
+    map.set(r.item, { rid: cur ? cur.rid : r.id, item: r.item, kind: r.kind, ts: r.ts, at: cur ? (cur.at || cur.ts) : r.ts, data: r.data, amended: !!r.amends || (cur && cur.amended) || false, card, local: true });
   }
-  showSheet(head({ business: 'Business idea', tech: 'Tech idea' }[it.category] || 'Idea', it),
-    el('div', { className: 'scroll' }, para('big-text', it.idea),
-      it.why || it.topic ? more([it.why ? para('why', 'Why: ' + it.why) : '', it.topic ? el('p', { className: 'topic' }, el('b', { textContent: 'Topic: ' }), it.topic) : '']) : ''),
-    controls);
-  $('#sheet').dataset.kind = 'idea';
-}
-function ticketTech(it) {
-  const short = it.short && it.short !== it.about ? it.short : null;
-  newCard(true);
-  const line = para('why', short || it.about);
-  showSheet(head('Our tech', it),
-    el('div', { className: 'scroll' }, para('big-text', it.title), line, short ? more([], open => { line.textContent = open ? it.about : short; }) : ''),
-    el('div', { className: 'controls' }, el('p', { className: 'ask', textContent: 'How good is it?' }),
-      rowOf([1, 2, 3, 4, 5].map(n => btn(String(n), () => file(it, { r: n, tech: it.tech }), 'num'))),
-      el('div', { className: 'scale' }, el('span', { textContent: 'nah' }), el('span', { textContent: 'love it' })),
-      marks(it, () => ({ r: null, tech: it.tech }))));
-  $('#sheet').dataset.kind = 'tech-score';
-}
-function ticketMiss(it) {
-  newCard(true);
-  const said = it.said_short || it.said, before = it.before_short || it.before, c = it.ctx;
-  const quote = para('quote', said), ctx = para('ctx', before), ctxLabel = el('p', { className: 'label', textContent: 'Before that' });
-  const line = m => el('p', { className: 'ctx' }, el('b', { textContent: m.who === 'you' ? 'You: ' : 'Agent: ' }), m.text);
-  const whenText = c && c.when ? new Date(c.when).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
-  const rest = c ? [
-    el('p', { className: 'label', textContent: 'What it was about' }), para('ctx', [whenText, c.about].filter(Boolean).join(' · ')),
-    (c.before || []).length ? [el('p', { className: 'label', textContent: 'The messages before' }), c.before.map(line)] : [],
-    (c.after || []).length ? [el('p', { className: 'label', textContent: 'What came after' }), c.after.map(line)] : [],
-  ] : (it.agent ? [el('p', { className: 'label', textContent: "The agent's last words" }), para('ctx', it.agent)] : []);
-  showSheet(head('Real miss?', it),
-    el('div', { className: 'scroll' },
-      el('p', { className: 'label', textContent: it.interrupted ? 'You stopped the agent and said' : 'You said' }), quote,
-      ctxLabel, ctx,
-      more([rest, el('p', { className: 'label', textContent: 'What counts as a miss' }), para('ctx', "Misunderstood it, ignored it, didn't do it, or you had to repeat it. Asking for changes to good work isn't a miss.")],
-      open => { quote.textContent = open ? it.said : said; ctx.textContent = open ? it.before : before; const hide = open && !!c; ctx.hidden = hide; ctxLabel.hidden = hide; })),
-    el('div', { className: 'controls' },
-      el('p', { className: 'ask', textContent: 'Did the agent miss it?' }),
-      rowOf([btn('Yes', () => file(it, { answer: 'yes' })), btn('No', () => file(it, { answer: 'no' })), btn('Unsure', () => file(it, { answer: 'unsure' }))]),
-      marks(it, () => ({ answer: null }))));
-  $('#sheet').dataset.kind = 'miss';
-}
-function ticketGame(it) {
-  showSheet(head('Play this', it),
-    el('div', { className: 'scroll' }, para('big-text', it.title), para('why', it.blurb), it.round > 1 ? para('why', 'A second go.') : '',
-      para('why', 'Tap DONE when you’re done.')),
-    el('div', { className: 'controls' }, rowOf(btn('Play', () => startGame(it), 'go'))));
-  $('#sheet').dataset.kind = 'game';
+  return [...map.values()].sort((a, c) => ((a.ts || '') < (c.ts || '') ? 1 : -1));
 }
 
 /* ---------- playing: time counts only while the game is on screen, and is saved as it goes ---------- */
@@ -616,26 +817,6 @@ function endGame() {
   if (p) ticketAfterPlay(p.item, p.acc);
 }
 function fmtTime(ms) { const s = Math.round(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
-function ticketAfterPlay(it, ms) {
-  newCard(false);
-  const pick = { fun: null, replay: null };
-  const go = btn('File it', () => file(it, { game: it.game, upload: it.upload, round: it.round, fun: pick.fun, replay: pick.replay, play_ms: Math.round(ms), broken: false }, 'endplay'), 'go');
-  go.disabled = true;
-  const check = () => { go.disabled = !(pick.fun && pick.replay !== null); };
-  const nums = [1, 2, 3, 4, 5].map(n => btn(String(n), () => { pick.fun = n; nums.forEach((b, i) => b.classList.toggle('on', i === n - 1)); check(); }, 'num'));
-  const yes = btn('Yes', () => { pick.replay = true; yes.classList.add('on'); no.classList.remove('on'); check(); });
-  const no = btn('No', () => { pick.replay = false; no.classList.add('on'); yes.classList.remove('on'); check(); });
-  showSheet(
-    el('div', { className: 'tick-head' }, el('span', { className: 'tag', textContent: it.title }), el('button', { type: 'button', className: 'linky', textContent: 'back to the game', onclick: () => startGame(it, ms) })),
-    el('div', { className: 'scroll' },
-      el('p', { className: 'ask', textContent: `You played ${fmtTime(ms)}. How fun?` }), rowOf(nums),
-      el('div', { className: 'scale' }, el('span', { textContent: 'dull' }), el('span', { textContent: 'great' })),
-      el('p', { className: 'ask', style: 'margin-top:14px', textContent: 'Play it again?' }), rowOf([yes, no]),
-      marks(it, () => ({ game: it.game, upload: it.upload, round: it.round, fun: null, replay: null, play_ms: Math.round(ms), broken: false }), 'endplay')),
-    el('div', { className: 'controls' }, rowOf(go),
-      el('button', { type: 'button', className: 'linky', style: 'width:100%', textContent: "It didn't work", onclick: () => file(it, { game: it.game, upload: it.upload, round: it.round, fun: null, replay: null, play_ms: Math.round(ms), broken: true }, 'endplay') })));
-  $('#sheet').dataset.kind = 'afterplay';
-}
 
 /* ---------- gates ---------- */
 function gatePaste(err) {
@@ -718,7 +899,7 @@ async function details() {
   try { if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); used = (e.usage / 1048576).toFixed(0) + ' MB'; } } catch (e) {}
   const kv = (a, b) => el('div', { className: 'kv' }, el('span', { textContent: a }), el('span', { textContent: b }));
   showSheet(head('Details'),
-    el('div', { className: 'scroll' }, kv('Ideas left', String(count('idea'))), kv('Real-miss calls left', String(count('miss'))), kv('Technologies left', String(count('tech-score'))),
+    el('div', { className: 'scroll' }, kv('Ideas left', String(count('idea'))), kv('Real-miss calls left', String(count('miss'))), kv('Technologies left', String(count('tech-score'))), kv('Profile questions left', String(count('profile'))),
       kv('Games left', `${count('game')}${S.gamesReady ? '' : ' (not on this phone yet)'}`), kv('Sent, not yet confirmed', String(rows.filter(r => r.sent_at).length)),
       kv('Backlog built', S.backlog ? ago(S.backlog.built_at) : 'never'), kv('Storage used', used || 'unknown'), kv('Storage', storage), kv('Playing as', S.player), kv('Version', APP_VERSION)),
     el('div', { className: 'controls' }, rowOf([btn('Sync now', () => { hideSheet('off'); sync(); }), btn('Close', () => hideSheet('off'))]),
@@ -728,6 +909,7 @@ async function details() {
 async function afterKey() {
   S.backlog = (await kvGet('backlog')) || S.backlog;
   await checkPack();
+  if (S.keys && !feedEl().querySelector('.reel:not(.puzzle):not(.end)')) await buildFeed();
   refresh();
 }
 
@@ -735,7 +917,7 @@ async function afterKey() {
 async function boot() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   try { await openDB(); }
-  catch (e) { $('#status').textContent = 'This browser refused to store anything (private mode?). Results could not be kept, so the machine is off.'; $('#big').disabled = true; return; }
+  catch (e) { $('#status').textContent = 'This browser refused to store anything (private mode?). Results could not be kept, so the machine is off.'; return; }
   const link = parseLink(location.hash);
   if (link) {
     // a Home Screen icon may replay the same address on every launch: never let an old key undo a newer pasted one
@@ -747,7 +929,8 @@ async function boot() {
   S.player = (await kvGet('player')) || 'overseer';
   S.backlog = (await kvGet('backlog')) || null;
   await checkPack();
-  $('#big').onclick = press;
+  feedEl().addEventListener('scroll', onFeedScroll, { passive: true });
+  window.addEventListener('resize', sizeFeed);
   $('#done').onclick = endGame;
   $('#more').onclick = details;
   $('#stash').onclick = () => stashView('neither', 'r');
@@ -766,6 +949,7 @@ async function boot() {
   refresh();
   const session = await kvGet('session');
   if (!S.keys) { gatePaste(); return; }
+  await buildFeed();
   if (session && session.item && !(await doneSet()).has(session.item.id)) ticketAfterPlay(session.item, session.acc || 0);
   else if (isIOS && !standalone() && !(await kvGet('browser_ok'))) gateInstall();
   await sync();
