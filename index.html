@@ -187,6 +187,15 @@ textarea{height:70px;resize:none}
 .feed-marker{display:none}
 .reel .qcard{border-bottom:0}
 @media (max-width:360px){.plate h1{font-size:12px;letter-spacing:.08em}.plate .rivet{display:none}.g span{display:none}.g b{font-size:14px}.g b.small{font-size:10px}#top{gap:5px;padding:0 6px}}
+/*QUESTIONS-START*/
+.decides{margin:.5rem 0 0;font-size:.82rem;color:var(--soft)}
+.decides b{font-weight:600}
+.pickopts{display:flex;flex-direction:column;gap:.5rem}
+.pickopt{display:block;width:100%;min-height:44px;text-align:left;padding:.7rem .8rem;white-space:normal;line-height:1.3}
+.pickopt small{display:block;margin-top:.25rem;font-weight:400;color:var(--soft)}
+.pickopt img{display:block;width:100%;height:auto;border-radius:6px;margin-bottom:.4rem}
+.pickopt.on small{color:inherit}
+/*QUESTIONS-END*/
 </style>
 </head>
 <body>
@@ -209,7 +218,7 @@ textarea{height:70px;resize:none}
 <section id="player" hidden><div id="playbar"><span id="playtitle"></span><button id="done" type="button">DONE</button></div></section>
 <script>
 'use strict';
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.6.0';
 const RESEND_MS = 6 * 3600e3;      // the channel keeps a message 12 h; a result the PC hasn't confirmed goes again
 const MAX_SENDS = 40;              // per sync; the channel allows 250 a day
 const SEND_TIMEOUT = 20000;
@@ -472,8 +481,9 @@ async function stampAndGo() {
 }
 
 /* ---------- the feed: vertical full-screen reels. Scroll down for the next thing, scroll up for what you did before: that IS the history ---------- */
-const CARD_KINDS = ['idea', 'miss', 'tech-score', 'profile', 'game'];
+const CARD_KINDS = ['idea', 'miss', 'tech-score', 'profile', 'game', 'pick'];
 const PAGE = 6;                 // reels added each time he nears the end
+const ROUND = 6;                // cards in a round, about 3 minutes, unless his energy tap says otherwise; then a real ending and a choice
 const PAST_SHOWN = 40;          // earlier answers drawn at first; "earlier" brings more
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const feedEl = () => $('#feed');
@@ -499,6 +509,7 @@ function rowOf(buttons) { return el('div', { className: 'row' }, buttons); }
 /* a reel for a card. opts: pre (his earlier answer), rid (the result a change names), past */
 function cardReel(it, opts) {
   opts = opts || {};
+  const gate = !opts.past && !opts.pre && !!it.sets_round;     // the energy tap: the round waits for it
   const R = { it, rid: opts.rid || null, last: null, busy: false, part: null, played: it.kind !== 'game' || !!opts.pre };
   const status = para('status-line', '');
   const sub = btn('Submit', () => submit(), 'go');
@@ -513,7 +524,7 @@ function cardReel(it, opts) {
     R.last = opts.pre ? snap() : null;
     body.replaceChildren(R.part.node);
     if (!opts.past) {
-      const sk = el('button', { type: 'button', className: 'linky skipbtn', textContent: 'skip this one', onclick: async () => { await skip(it); next(); } });
+      const sk = el('button', { type: 'button', className: 'linky skipbtn', textContent: 'skip this one', onclick: async () => { await skip(it); if (gate) openGate(); next(); } });
       body.append(sk);
     }
     foot.hidden = false;
@@ -551,6 +562,8 @@ function cardReel(it, opts) {
       $('#hint').textContent = first ? 'Filed.' : 'Changed. The old answer is kept, the new one counts.';
       update();
       sync();
+      if (first && c.answered && gate) { const n = it.sets_round[c.data.answer]; if (n) S.roundLen = n; openGate(); }
+      else if (first && c.answered) S.roundAnswered = (S.roundAnswered || 0) + 1;
       if (first && c.answered) next();
     } finally { R.busy = false; }
   }
@@ -590,6 +603,16 @@ function puzzleReel(n) {
       el('button', { type: 'button', className: 'linky', style: 'width:100%', textContent: 'New puzzle', onclick: fresh }),
       para('intro', 'Nothing here is recorded.')));
 }
+const roundSize = () => S.roundLen || (S.backlog && S.backlog.round) || ROUND;
+function openGate() { const F = S.feed; if (F && F.gate) { F.gate = false; F.roundLen = roundSize(); F.inRound = S.roundAnswered || 0; more(); } }
+function roundEndReel(n) {
+  const go = () => { const F = S.feed; S.roundAnswered = 0; F.waiting = false; F.inRound = 0; node.remove(); more(); };
+  const node = el('section', { className: 'reel end', 'data-kind': 'round-end' }, el('div', { className: 'reel-body' },
+    para('big-text', 'That’s the round.'),
+    para('why', 'You can stop here. Nothing else needs you today.'),
+    el('div', { className: 'row' }, btn(n + ' more', go, 'go'))));
+  return node;
+}
 function endReel() {
   return el('section', { className: 'reel end', 'data-kind': 'end' }, el('div', { className: 'reel-body' },
     para('big-text', S.backlog ? 'That’s everything for now.' : 'Open this once with service to load the questions.'),
@@ -606,8 +629,8 @@ async function buildFeed() {
   const noteOnly = new Map(entries.filter(e => !isAnswer(e.kind, e.data)).map(e => [e.item, e]));
   const past = entries.filter(e => isAnswer(e.kind, e.data) && done.has(e.item)).sort((a, b) => ((a.at || a.ts || '') < (b.at || b.ts || '') ? -1 : 1));
   const pool = poolOf(done).filter(i => CARD_KINDS.includes(i.kind) && (i.kind !== 'game' || S.gamesReady));
-  const upcoming = pool.filter(i => !skipped.has(i.id)).concat(pool.filter(i => skipped.has(i.id)));
-  S.feed = { rest: upcoming.slice(), noteOnly, count: 0, puzzles: 0 };
+  const upcoming = pool.filter(i => !skipped.has(i.id)).concat(pool.filter(i => skipped.has(i.id) && !i.sets_round));
+  S.feed = { rest: upcoming.slice(), noteOnly, count: 0, puzzles: 0, roundLen: roundSize(), inRound: S.roundAnswered || 0, waiting: false, gate: false };
   const shown = past.slice(-PAST_SHOWN), hidden = past.length - shown.length;
   const kids = [];
   if (hidden > 0) kids.push(el('section', { className: 'reel end', 'data-kind': 'earlier' }, el('div', { className: 'reel-body' },
@@ -631,20 +654,23 @@ function showEarlier(past, hidden) {
 }
 function more(first) {
   const F = S.feed, f = feedEl();
-  if (!F || F.ending) return;
+  if (!F || F.ending || F.waiting || F.gate) return;
   const add = [];
-  for (let k = 0; k < PAGE && F.rest.length; k++) {
+  if (F.rest[0] && F.rest[0].sets_round) { add.push(cardReel(F.rest.shift(), {})); F.gate = true; f.append(...add); sizeFeed(); return; }
+  for (let k = 0; k < PAGE && F.rest.length && F.inRound < F.roundLen; k++) {
     const it = F.rest.shift(), no = F.noteOnly.get(it.id);
     add.push(cardReel(it, no ? { pre: no.data, rid: no.rid } : {}));
-    if (++F.count % 4 === 0 && F.rest.length) add.push(puzzleReel(++F.puzzles));
+    F.inRound++;
+    if (++F.count % 4 === 0 && F.rest.length && F.inRound < F.roundLen) add.push(puzzleReel(++F.puzzles));
   }
   if (!F.rest.length) { add.push(endReel()); F.ending = true; }
+  else if (F.inRound >= F.roundLen) { add.push(roundEndReel(F.roundLen)); F.waiting = true; }
   f.append(...add);
   sizeFeed();
 }
 function onFeedScroll() {
   const f = feedEl();
-  if (S.feed && !S.feed.ending && f.scrollTop + f.clientHeight * 3 > f.scrollHeight) more();
+  if (S.feed && !S.feed.ending && !S.feed.waiting && !S.feed.gate && f.scrollTop + f.clientHeight * 3 > f.scrollHeight) more();
 }
 function ticketAfterPlay(it, ms) {
   let reel = [...feedEl().querySelectorAll('.reel')].find(r => r.dataset.item === it.id);
@@ -653,8 +679,8 @@ function ticketAfterPlay(it, ms) {
   reel.scrollIntoView({ block: 'start' });
 }
 
-const KIND_TAG = { idea: 'Idea', miss: 'Real miss?', 'tech-score': 'Our tech', game: 'Game', profile: 'About you' };
-const isAnswer = (kind, d) => kind === 'game' ? true : kind === 'profile' ? d.answer != null : kind === 'miss' ? d.answer != null : kind === 'idea' ? (d.r != null || d.ok != null) : d.r != null;
+const KIND_TAG = { idea: 'Idea', miss: 'Real miss?', 'tech-score': 'Our tech', game: 'Game', profile: 'About you', pick: 'This or that' };
+const isAnswer = (kind, d) => kind === 'game' ? true : (kind === 'profile' || kind === 'pick') ? d.answer != null : kind === 'miss' ? d.answer != null : kind === 'idea' ? (d.r != null || d.ok != null) : d.r != null;
 
 /* one card: returns {node, collect()}. collect() gives the result data, or null when he gave neither an answer nor a note. Answers only select. */
 function selectRow(labels, values, get, set, cls) {
@@ -663,6 +689,7 @@ function selectRow(labels, values, get, set, cls) {
   paint();
   return { node: rowOf(bs), paint };
 }
+const decidesEl = it => it.decides ? el('p', { className: 'decides' }, el('b', { textContent: 'This decides: ' }), it.decides, it.only_you ? ' Only you can answer this.' : '') : '';
 function cardEl(it, pre) {
   pre = pre || {};
   const st = { expanded: false, seed: false, noteEl: null };
@@ -680,7 +707,7 @@ function cardEl(it, pre) {
       return el('div', { className: 'axisrow' }, el('span', { className: 'axislabel', textContent: label }), r.node);
     }));
     if (Object.keys(p.axes).length) axes.open = true;
-    body = [para('big-text', it.idea), it.plain ? para('plain', 'In short: ' + it.plain) : '', it.why ? para('why', 'Why it was suggested: ' + it.why) : '', it.topic ? para('topic', 'Area: ' + it.topic) : ''];
+    body = [para('big-text', it.idea), it.plain ? para('plain', 'In short: ' + it.plain) : '', it.what ? para('plain', 'What it is: ' + it.what) : '', it.gets ? para('plain', 'What it gets you: ' + it.gets) : '', it.example ? para('plain', 'For example: ' + it.example) : '', it.why ? para('why', 'Why it was suggested: ' + it.why) : '', it.topic ? para('topic', 'Area: ' + it.topic) : ''];
     kids.push(q('How good is this idea?'), rr.node, scale('nah', 'love it'), q('What should happen to it?'), ok.node, axes);
     build = () => ({ r: p.r, ok: p.ok === 'a' ? true : p.ok === 'd' ? false : null, category: it.category || 'unknown', ...(Object.keys(p.axes).length ? { axes: p.axes } : {}) });
     st.has = () => p.r != null || p.ok === 'a' || p.ok === 'd';
@@ -725,6 +752,23 @@ function cardEl(it, pre) {
     }
     build = () => ({ answer: Array.isArray(p.a) ? (p.a.length ? p.a : null) : p.a });
     st.has = () => Array.isArray(p.a) ? p.a.length > 0 : p.a != null;
+  } else if (it.kind === 'pick') {
+    const p = { a: pre.answer == null ? null : pre.answer };
+    let anyMore = false;
+    const bs = it.options.map(o => {
+      const more = [o.what, o.gets ? 'What it gets you: ' + o.gets : '', o.example ? 'For example: ' + o.example : ''].filter(Boolean);
+      if (more.length) anyMore = true;
+      return el('button', { type: 'button', className: 'btn opt pickopt', 'data-opt': o.id, onclick: () => { p.a = p.a === o.id ? null : o.id; paint(); } },
+        o.img ? el('img', { src: o.img, alt: o.label || 'Option' }) : '', o.label || '', o.text ? el('small', { textContent: o.text }) : '', more.map(t => el('small', { className: 'pickmore', hidden: true, textContent: t })));
+    });
+    const paint = () => bs.forEach((b, i) => { const on = p.a === it.options[i].id; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+    paint();
+    body = [para('big-text', it.q), it.context ? para('why', it.context) : '', it.topic ? para('topic', 'Seed: ' + it.topic) : ''];
+    const opts = el('div', { className: 'pickopts' }, bs);
+    kids.push(opts);
+    if (anyMore) kids.push(el('button', { type: 'button', className: 'linky', style: 'width:100%', textContent: 'What each one gets you', onclick: () => opts.querySelectorAll('.pickmore').forEach(m => { m.hidden = !m.hidden; }) }));
+    build = () => { const o = it.options.find(x => x.id === p.a); return { answer: p.a, label: o ? (o.label || o.id).slice(0, 120) : '' }; };
+    st.has = () => p.a != null;
   } else if (it.kind === 'game') {
     const p = { fun: pre.fun || null, replay: pre.replay === undefined ? null : pre.replay, broken: !!pre.broken };
     const ms = pre.play_ms != null ? pre.play_ms : (it._ms || 0);
@@ -744,7 +788,7 @@ function cardEl(it, pre) {
     const seed = el('button', { type: 'button', className: 'pill', textContent: 'make this a seed', onclick: () => { st.seed = !st.seed; seed.classList.toggle('on', st.seed); } }); return seed;
   })()));
   const add = el('button', { type: 'button', className: 'pill' + (pre.note ? ' on' : ''), textContent: pre.note ? 'Your note' : '+ Add a note', onclick: () => { panel.hidden = !panel.hidden; if (!panel.hidden) box.focus(); } });
-  const node = el('section', { className: 'qcard', 'data-kind': it.kind, 'data-qtype': it.qtype || '' }, el('span', { className: 'tag small', textContent: KIND_TAG[it.kind] || it.kind }), intro, body, terms, el('div', { className: 'ctl' }, kids), el('div', { className: 'marks' }, add), panel);
+  const node = el('section', { className: 'qcard', 'data-kind': it.kind, 'data-qtype': it.qtype || '' }, el('span', { className: 'tag small', textContent: it.kind === 'pick' && it.options.length > 2 ? 'Pick one' : (KIND_TAG[it.kind] || it.kind) }), intro, body, decidesEl(it), terms, el('div', { className: 'ctl' }, kids), el('div', { className: 'marks' }, add), panel);
   return {
     node, item: it,
     collect() {
@@ -767,11 +811,12 @@ function summary(kind, d) {
   if (kind === 'idea') return [d.r != null ? d.r + '/5' : 'no number', okText].filter(Boolean).join(' · ');
   if (kind === 'tech-score') return d.r != null ? d.r + '/5' : 'no number';
   if (kind === 'miss') return d.answer || 'no answer';
+  if (kind === 'pick') return d.label || d.answer || 'no answer';
   if (kind === 'game') return d.broken ? "didn't work" : [d.fun != null ? 'fun ' + d.fun + '/5' : '', d.replay === true ? 'would replay' : d.replay === false ? 'no replay' : ''].filter(Boolean).join(' · ') || 'played';
   if (kind === 'profile') return Array.isArray(d.answer) ? d.answer.join(', ') : d.answer != null ? (typeof d.answer === 'number' ? d.answer + '/5' : String(d.answer)) : 'no answer';
   return '';
 }
-const cardText = c => c.kind === 'idea' ? c.idea : c.kind === 'miss' ? 'You said: ' + (c.said_short || c.said) : c.kind === 'profile' ? c.q : c.kind === 'tech-score' ? c.title + ': ' + (c.short || c.about) : c.title;
+const cardText = c => c.kind === 'pick' ? c.q : c.kind === 'idea' ? c.idea : c.kind === 'miss' ? 'You said: ' + (c.said_short || c.said) : c.kind === 'profile' ? c.q : c.kind === 'tech-score' ? c.title + ': ' + (c.short || c.about) : c.title;
 async function historyEntries() {
   const b = S.backlog || {}, map = new Map();
   (b.history || []).forEach(e => map.set(e.item, { ...e, local: false }));
