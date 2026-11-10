@@ -186,7 +186,7 @@ textarea{height:70px;resize:none}
 <section id="player" hidden><div id="playbar"><span id="playtitle"></span><button id="done" type="button">DONE</button></div></section>
 <script>
 'use strict';
-const APP_VERSION = '1.8.0';
+const APP_VERSION = '1.9.0';
 const RESEND_MS = 6 * 3600e3;      // the channel keeps a message 12 h; a result the PC hasn't confirmed goes again
 const MAX_SENDS = 40;              // per sync; the channel allows 250 a day
 const SEND_TIMEOUT = 20000;
@@ -776,15 +776,17 @@ function cardEl(it, pre) {
     build = () => { const o = it.options.find(x => x.id === p.a); return { answer: p.a, label: o ? (o.label || o.id).slice(0, 120) : '' }; };
     st.has = () => p.a != null;
   } else if (it.kind === 'game') {
-    const p = { fun: pre.fun || null, replay: pre.replay === undefined ? null : pre.replay, broken: !!pre.broken };
+    const p = { fun: pre.fun || null, replay: pre.replay === undefined ? null : pre.replay, broken: !!pre.broken, vs: pre.vs || null };
     const ms = pre.play_ms != null ? pre.play_ms : (it._ms || 0);
     const f = selectRow(['1', '2', '3', '4', '5'], [1, 2, 3, 4, 5], () => p.fun, v => { p.fun = v; if (v) { p.broken = false; bk.classList.remove('on'); } }, 'num');
     const rp = selectRow(['Yes', 'No'], [true, false], () => p.replay, v => { p.replay = v; }, '');
     const bk = el('button', { type: 'button', className: 'pill' + (p.broken ? ' on' : ''), textContent: 'Broken', onclick: () => { p.broken = !p.broken; bk.classList.toggle('on', p.broken); } });
     body = [para('big-text', it.title), para('why', 'Played ' + fmtTime(ms))];
-    kids.push(q('Fun?'), f.node, scale('dull', 'great'), q('Play again?'), rp.node, el('div', { className: 'marks' }, bk));
-    build = () => ({ game: it.game, upload: it.upload, round: it.round, fun: p.fun, replay: p.replay, play_ms: Math.round(ms), broken: p.broken });
-    st.has = () => p.fun != null || p.replay !== null || p.broken;
+    kids.push(q('Fun?'), f.node, scale('dull', 'great'), q('Play again?'), rp.node);
+    if (it.vs) kids.push(q('Compared with ' + it.vs.title + '?'), selectRow(['Better', 'Same', 'Worse'], ['better', 'same', 'worse'], () => p.vs, v => { p.vs = v; }, '').node);
+    kids.push(el('div', { className: 'marks' }, bk));
+    build = () => Object.assign({ game: it.game, upload: it.upload, round: it.round, fun: p.fun, replay: p.replay, play_ms: Math.round(ms), broken: p.broken }, it.vs && p.vs ? { vs: p.vs, vs_game: it.vs.game } : {});
+    st.has = () => p.fun != null || p.replay !== null || p.broken || p.vs != null;
   }
   /* terms and a note: any card can be annotated (this replaced the "confusing" button) */
   const terms = (it.terms || []).length ? el('div', { className: 'terms' }, it.terms.map(([t, d]) => el('span', { className: 'term' }, el('i', { textContent: t }), ' = ' + d + '. '))) : '';
@@ -824,7 +826,7 @@ function summary(kind, d) {
   if (kind === 'tech-score') return d.r != null ? d.r + '/5' : 'no number';
   if (kind === 'miss') return d.answer || 'no answer';
   if (kind === 'pick') return d.label || d.answer || 'no answer';
-  if (kind === 'game') return d.broken ? "didn't work" : [d.fun != null ? 'fun ' + d.fun + '/5' : '', d.replay === true ? 'would replay' : d.replay === false ? 'no replay' : ''].filter(Boolean).join(' · ') || 'played';
+  if (kind === 'game') return d.broken ? "didn't work" : [d.fun != null ? 'fun ' + d.fun + '/5' : '', d.replay === true ? 'would replay' : d.replay === false ? 'no replay' : '', d.vs ? d.vs + ' than ' + (d.vs_game || 'the last') : ''].filter(Boolean).join(' · ') || 'played';
   if (kind === 'profile') return Array.isArray(d.answer) ? d.answer.join(', ') : d.answer != null ? (typeof d.answer === 'number' ? d.answer + '/5' : String(d.answer)) : 'no answer';
   return '';
 }
