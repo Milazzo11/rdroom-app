@@ -958,7 +958,7 @@ async function details() {
   try { if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); used = (e.usage / 1048576).toFixed(0) + ' MB'; } } catch (e) {}
   const kv = (a, b) => el('div', { className: 'kv' }, el('span', { textContent: a }), el('span', { textContent: b }));
   showSheet(head('Details'),
-    el('div', { className: 'scroll' }, kv('Ideas left', String(count('idea'))), kv('Real-miss calls left', String(count('miss'))), kv('Technologies left', String(count('tech-score'))), kv('Profile questions left', String(count('profile'))),
+    el('div', { className: 'scroll' }, kv('Ideas left', String(count('idea'))), kv('Real-miss calls left', String(count('miss'))), kv('Technologies left', String(count('tech-score'))), kv('Profile questions left', String(count('profile'))), kv('Picks left', String(count('pick'))),
       kv('Games left', `${count('game')}${S.gamesReady ? '' : ' (not on this phone yet)'}`), kv('Sent, not yet confirmed', String(rows.filter(r => r.sent_at).length)),
       kv('Backlog built', S.backlog ? ago(S.backlog.built_at) : 'never'), kv('Storage used', used || 'unknown'), kv('Storage', storage), kv('Playing as', S.player), kv('Version', APP_VERSION)),
     el('div', { className: 'controls' }, rowOf([btn('Sync now', () => { hideSheet('off'); sync(); }), btn('Close', () => hideSheet('off'))]),

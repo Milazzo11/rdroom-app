@@ -1,6 +1,6 @@
 // R&D Room service worker. It only serves files; syncing happens in the page, because iOS has no background sync
 // and stops a service worker soon after the app closes.
-const V = '8a60be5fc6e917ec';
+const V = '064357b12ed7939d';
 const SHELL = 'rdroom-shell-' + V;
 const FILES = ['index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
 const BASE = new URL('./', self.location).pathname;
